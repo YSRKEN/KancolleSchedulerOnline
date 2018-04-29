@@ -124,4 +124,14 @@ window.onload = () => {
         element.innerText += "タイミング：" + expTask.timing + "　";
         element.innerText += "第" + expTask.fleetIndex + "艦隊\n";
     }
+    var svg = d3.select("#canvas").append("svg")
+        .attr("width", 400)
+        .attr("height", 400);
+    svg.append("circle")
+        .attr("cx",100)
+        .attr("cy",100)
+        .attr("r",40)
+        .attr("fill","green")
+        .attr("stroke-width",3)
+        .attr("stroke","orange");
 };
