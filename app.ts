@@ -54,7 +54,7 @@ class ExpeditionTask {
     private _timing: number;
     get timing(): number { return this._timing; }
     /**
-     * 第n艦隊なのかを指定
+     * 第n艦隊なのか(艦隊番号)を指定
      */
     private _fleetIndex: number;
     get fleetIndex(): number { return this._fleetIndex; }
@@ -63,12 +63,42 @@ class ExpeditionTask {
      * コンストラクタ
      * @param expedition 遠征情報
      * @param timing 遠征が始まるタイミング
-     * @param fleet_index 第n艦隊
+     * @param fleetIndex 艦隊番号
      */
-    constructor(expedition: Expedition, timing: number, fleet_index: number) {
+    constructor(expedition: Expedition, timing: number, fleetIndex: number) {
         this._expedition = expedition;
         this._timing = timing;
-        this._fleetIndex = fleet_index;
+        this._fleetIndex = fleetIndex;
+    }
+};
+
+/**
+ * 遠征情報および遠征タスク情報を格納するデータベース
+ */
+class DataStore {
+    /**
+     * 遠征一覧
+     */
+    private static expeditionList: Array<Expedition>;
+
+    /**
+     * データベースを初期化
+     */
+    public static initialize() {
+        DataStore.expeditionList = new Array<Expedition>();
+        DataStore.expeditionList.push(new Expedition('鎮守府海域', '長距離練習航海', 30, 1, 4));
+        DataStore.expeditionList.push(new Expedition('鎮守府海域', '海上護衛任務', 90, 0, 1));
+        DataStore.expeditionList.push(new Expedition('鎮守府海域', '防空射撃演習', 40, 3, 3));
+    }
+    /**
+     * 遠征名・タイミング・艦隊番号から遠征タスクを作成
+     * @param name 遠征名
+     * @param timing タイミング
+     * @param fleetIndex 艦隊番号
+     */
+    public static makeExpeditionTask(name: String, timing: number, fleetIndex: number): ExpeditionTask {
+        var expedition = DataStore.expeditionList.filter(e => e.name == name)[0];
+        return new ExpeditionTask(expedition, timing, fleetIndex);
     }
 };
 
@@ -76,20 +106,18 @@ class ExpeditionTask {
  * スタートアップ
  */
 window.onload = () => {
-    // 遠征リストを初期化
-    var exp1 = new Expedition("鎮守府海域", "長距離練習航海", 30, 1, 4);
-    var exp2 = new Expedition("鎮守府海域", "海上護衛任務",   90, 0, 1);
-    var exp3 = new Expedition("鎮守府海域", "防空射撃演習",   40, 3, 3);
-    var expList = [exp1, exp2, exp3];
-    // 遠征リストと位置情報から、遠征タスクを作成
-    var expTask1 = new ExpeditionTask(expList[1], 90, 3);
-    var expTask2 = new ExpeditionTask(expList[1], 200, 4);
-    var expTaskList = [expTask1, expTask2];
-    // 遠征タスクを表示する
     var element = document.getElementById('taskList');
+    // データベースを初期化
+    DataStore.initialize();
+    // 遠征タスクを作成
+    var expTaskList = new Array<ExpeditionTask>();
+    expTaskList.push(DataStore.makeExpeditionTask('長距離練習航海', 0, 2));
+    expTaskList.push(DataStore.makeExpeditionTask('海上護衛任務', 90, 3));
+    expTaskList.push(DataStore.makeExpeditionTask('海上護衛任務', 200, 4));
+    // 遠征タスクを表示する
     for (var i = 0; i < expTaskList.length; ++i) {
         var expTask = expTaskList[i];
-        element.innerText += "・" + expTask.expedition.areaName + "-";
+        element.innerText += "・" + expTask.expedition.areaName + "―";
         element.innerText += expTask.expedition.name + "　";
         element.innerText += "タイミング：" + expTask.timing + "　";
         element.innerText += "第" + expTask.fleetIndex + "艦隊\n";
