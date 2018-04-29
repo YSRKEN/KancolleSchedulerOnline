@@ -89,6 +89,9 @@ var DataStore = /** @class */ (function () {
         DataStore.expeditionList.push(new Expedition("鎮守府海域", "長距離練習航海", 30, 1, 4));
         DataStore.expeditionList.push(new Expedition("鎮守府海域", "海上護衛任務", 90, 0, 1));
         DataStore.expeditionList.push(new Expedition("鎮守府海域", "防空射撃演習", 40, 3, 3));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "長時間対潜警戒", 135, 0, 4));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "強行偵察任務", 90, 1, 4));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "鼠輸送作戦", 240, 0, 1));
     };
     /**
      * 遠征名・タイミング・艦隊番号から遠征タスクを作成
@@ -103,6 +106,40 @@ var DataStore = /** @class */ (function () {
     return DataStore;
 }());
 ;
+var Constant = /** @class */ (function () {
+    function Constant() {
+    }
+    /**
+     * 遠征タスクの横幅
+     */
+    Constant.TASK_WIDTH = 150;
+    /**
+     * 遠征タスクの縦幅(/分)
+     */
+    Constant.TASK_HEIGHT_PER_TIME = 1;
+    /**
+     * 遠征の総艦隊数
+     */
+    Constant.FLEET_COUNT = 3;
+    /**
+     * 1日の分数
+     */
+    Constant.ALL_TIMES = 60 * 24;
+    /**
+     * 時間を表示するための余白
+     */
+    Constant.CANVAS_HOUR_MARGIN = 50;
+    /**
+     * スケジュール表示の横幅
+     */
+    Constant.CANVAS_WIDTH = Constant.TASK_WIDTH * Constant.FLEET_COUNT + Constant.CANVAS_HOUR_MARGIN;
+    /**
+     * スケジュール表示の縦幅
+     */
+    Constant.CANVAS_HEIGHT = Constant.TASK_HEIGHT_PER_TIME * Constant.ALL_TIMES;
+    return Constant;
+}());
+;
 /**
  * スタートアップ
  */
@@ -112,26 +149,72 @@ window.onload = function () {
     DataStore.initialize();
     // 遠征タスクを作成
     var expTaskList = new Array();
-    expTaskList.push(DataStore.makeExpeditionTask("長距離練習航海", 0, 2));
-    expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 90, 3));
-    expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 200, 4));
+    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒", 95, 0));
+    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務", 95, 1));
+    expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦", 95, 2));
+    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒", 230, 0));
+    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務", 185, 1));
+    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒", 425, 0));
+    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒", 815, 0));
+    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒", 950, 0));
+    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務", 425, 1));
+    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務", 815, 1));
+    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務", 905, 1));
+    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務", 995, 1));
+    expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦", 425, 2));
+    expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦", 815, 2));
     // 遠征タスクを表示する
-    for (var i = 0; i < expTaskList.length; ++i) {
+    /*for (var i = 0; i < expTaskList.length; ++i) {
         var expTask = expTaskList[i];
         element.innerText += "・" + expTask.expedition.areaName + "―";
         element.innerText += expTask.expedition.name + "　";
         element.innerText += "タイミング：" + expTask.timing + "　";
         element.innerText += "第" + expTask.fleetIndex + "艦隊\n";
+    }*/
+    // 遠征タスクを描画する
+    var canvas = d3.select("#canvas").append("svg")
+        .attr("width", Constant.CANVAS_WIDTH)
+        .attr("height", Constant.CANVAS_HEIGHT);
+    for (var w = 0; w <= Constant.FLEET_COUNT; ++w) {
+        canvas.append("line")
+            .attr("x1", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
+            .attr("x2", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
+            .attr("y1", 0)
+            .attr("y2", Constant.CANVAS_HEIGHT)
+            .attr("stroke-width", 1)
+            .attr("stroke", "black");
     }
-    var svg = d3.select("#canvas").append("svg")
-        .attr("width", 400)
-        .attr("height", 400);
-    svg.append("circle")
-        .attr("cx", 100)
-        .attr("cy", 100)
-        .attr("r", 40)
-        .attr("fill", "green")
-        .attr("stroke-width", 3)
-        .attr("stroke", "orange");
+    for (var h = 0; h <= 24; ++h) {
+        canvas.append("line")
+            .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
+            .attr("y2", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
+            .attr("x1", 0 + Constant.CANVAS_HOUR_MARGIN)
+            .attr("x2", Constant.CANVAS_WIDTH + Constant.CANVAS_HOUR_MARGIN)
+            .attr("stroke-width", 1)
+            .attr("stroke", "black");
+        var hour = (h + 5) % 24;
+        var hourString = hour.toString() + ":00";
+        canvas.append("text")
+            .attr("x", Constant.CANVAS_HOUR_MARGIN - hourString.length * 18 / 2)
+            .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + (h == 0 ? 18 : 9))
+            .attr("font-size", "18px")
+            .text(hourString);
+    }
+    for (var i = 0; i < expTaskList.length; ++i) {
+        var task = expTaskList[i];
+        canvas.append("rect")
+            .attr("x", Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN)
+            .attr("y", Constant.TASK_HEIGHT_PER_TIME * task.timing)
+            .attr("width", Constant.TASK_WIDTH)
+            .attr("height", Constant.TASK_HEIGHT_PER_TIME * task.expedition.time)
+            .attr("stroke", "black")
+            .style("opacity", 0.8)
+            .attr("fill", "skyblue");
+        canvas.append("text")
+            .attr("x", Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN + 2)
+            .attr("y", Constant.TASK_HEIGHT_PER_TIME * task.timing + 18 + 2)
+            .attr("font-size", "18px")
+            .text(task.expedition.name);
+    }
 };
 //# sourceMappingURL=app.js.map

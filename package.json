@@ -1,5 +1,5 @@
 {
-  "name": "KCS-Web",
+  "name": "kcs-web",
   "version": "1.0.0",
   "main": "app.js",
   "dependencies": {
