@@ -1,4 +1,5 @@
-//import * as d3 from 'd3';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * 遠征情報を表すクラス
  */

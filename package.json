@@ -1,9 +1,25 @@
 {
-    "dependencies": {
-    "d3": "^5.1.0"
-    },
-    "devDependencies": {
-    "@type/d3": "~5.0.0",
-    "version": "~2.8.3"
-    }
+  "name": "KCS-Web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "d3": "^5.1.0",
+    "typescript": "^2.8.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YSRKEN/KancolleSchedulerOnline.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YSRKEN/KancolleSchedulerOnline/issues"
+  },
+  "homepage": "https://github.com/YSRKEN/KancolleSchedulerOnline#readme"
 }
