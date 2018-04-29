@@ -198,20 +198,33 @@ window.onload = () => {
             .attr("font-size", "18px")
             .text(hourString);
     }
-    for (var i = 0; i < expTaskList.length; ++i) {
-        var task = expTaskList[i];
-        canvas.append("rect")
-            .attr("x",Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN)
-            .attr("y",Constant.TASK_HEIGHT_PER_TIME * task.timing)
-            .attr("width",Constant.TASK_WIDTH)
-            .attr("height",Constant.TASK_HEIGHT_PER_TIME * task.expedition.time)
-            .attr("stroke", "black")
-            .style("opacity", 0.8)
-            .attr("fill","skyblue");
-        canvas.append("text")
-        .attr("x",Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN + 2)
-        .attr("y",Constant.TASK_HEIGHT_PER_TIME * task.timing + 18 + 2)
+    var tasks = canvas.selectAll("boxes")
+        .data(expTaskList)
+        .enter()
+        .append("g");
+    tasks.append("rect")
+        .attr("x",function(task){
+            return Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN;
+        })
+        .attr("y",function(task){
+            return Constant.TASK_HEIGHT_PER_TIME * task.timing;
+        })
+        .attr("width",Constant.TASK_WIDTH)
+        .attr("height",function(task){
+            return Constant.TASK_HEIGHT_PER_TIME * task.expedition.time;
+        })
+        .attr("stroke", "black")
+        .style("opacity", 0.8)
+        .attr("fill","skyblue");
+    tasks.append("text")
+        .attr("x",function(task){
+            return Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN + 2;
+        })
+        .attr("y",function(task){
+            return Constant.TASK_HEIGHT_PER_TIME * task.timing + 18 + 2;
+        })
         .attr("font-size", "18px")
-        .text(task.expedition.name);
-    }
+        .text(function(task){
+            return task.expedition.name;
+        });
 };
