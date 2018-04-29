@@ -1,3 +1,4 @@
+//import * as d3 from 'd3';
 /**
  * 遠征情報を表すクラス
  */
@@ -83,9 +84,9 @@ var DataStore = /** @class */ (function () {
      */
     DataStore.initialize = function () {
         DataStore.expeditionList = new Array();
-        DataStore.expeditionList.push(new Expedition('鎮守府海域', '長距離練習航海', 30, 1, 4));
-        DataStore.expeditionList.push(new Expedition('鎮守府海域', '海上護衛任務', 90, 0, 1));
-        DataStore.expeditionList.push(new Expedition('鎮守府海域', '防空射撃演習', 40, 3, 3));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "長距離練習航海", 30, 1, 4));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "海上護衛任務", 90, 0, 1));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "防空射撃演習", 40, 3, 3));
     };
     /**
      * 遠征名・タイミング・艦隊番号から遠征タスクを作成
@@ -104,14 +105,14 @@ var DataStore = /** @class */ (function () {
  * スタートアップ
  */
 window.onload = function () {
-    var element = document.getElementById('taskList');
+    var element = document.getElementById("taskList");
     // データベースを初期化
     DataStore.initialize();
     // 遠征タスクを作成
     var expTaskList = new Array();
-    expTaskList.push(DataStore.makeExpeditionTask('長距離練習航海', 0, 2));
-    expTaskList.push(DataStore.makeExpeditionTask('海上護衛任務', 90, 3));
-    expTaskList.push(DataStore.makeExpeditionTask('海上護衛任務', 200, 4));
+    expTaskList.push(DataStore.makeExpeditionTask("長距離練習航海", 0, 2));
+    expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 90, 3));
+    expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 200, 4));
     // 遠征タスクを表示する
     for (var i = 0; i < expTaskList.length; ++i) {
         var expTask = expTaskList[i];

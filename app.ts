@@ -1,4 +1,6 @@
-﻿/**
+//import * as d3 from 'd3';
+
+/**
  * 遠征情報を表すクラス
  */
 class Expedition {
@@ -84,11 +86,11 @@ class DataStore {
     /**
      * データベースを初期化
      */
-    public static initialize() {
+    static initialize() {
         DataStore.expeditionList = new Array<Expedition>();
-        DataStore.expeditionList.push(new Expedition('鎮守府海域', '長距離練習航海', 30, 1, 4));
-        DataStore.expeditionList.push(new Expedition('鎮守府海域', '海上護衛任務', 90, 0, 1));
-        DataStore.expeditionList.push(new Expedition('鎮守府海域', '防空射撃演習', 40, 3, 3));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "長距離練習航海", 30, 1, 4));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "海上護衛任務", 90, 0, 1));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "防空射撃演習", 40, 3, 3));
     }
     /**
      * 遠征名・タイミング・艦隊番号から遠征タスクを作成
@@ -96,7 +98,7 @@ class DataStore {
      * @param timing タイミング
      * @param fleetIndex 艦隊番号
      */
-    public static makeExpeditionTask(name: String, timing: number, fleetIndex: number): ExpeditionTask {
+    static makeExpeditionTask(name: String, timing: number, fleetIndex: number): ExpeditionTask {
         var expedition = DataStore.expeditionList.filter(e => e.name == name)[0];
         return new ExpeditionTask(expedition, timing, fleetIndex);
     }
@@ -106,14 +108,14 @@ class DataStore {
  * スタートアップ
  */
 window.onload = () => {
-    var element = document.getElementById('taskList');
+    var element = document.getElementById("taskList");
     // データベースを初期化
     DataStore.initialize();
     // 遠征タスクを作成
     var expTaskList = new Array<ExpeditionTask>();
-    expTaskList.push(DataStore.makeExpeditionTask('長距離練習航海', 0, 2));
-    expTaskList.push(DataStore.makeExpeditionTask('海上護衛任務', 90, 3));
-    expTaskList.push(DataStore.makeExpeditionTask('海上護衛任務', 200, 4));
+    expTaskList.push(DataStore.makeExpeditionTask("長距離練習航海", 0, 2));
+    expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 90, 3));
+    expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 200, 4));
     // 遠征タスクを表示する
     for (var i = 0; i < expTaskList.length; ++i) {
         var expTask = expTaskList[i];

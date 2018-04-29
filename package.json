@@ -1,0 +1,9 @@
+{
+    "dependencies": {
+    "d3": "^5.1.0"
+    },
+    "devDependencies": {
+    "@type/d3": "~5.0.0",
+    "version": "~2.8.3"
+    }
+}
