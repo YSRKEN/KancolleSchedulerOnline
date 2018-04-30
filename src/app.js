@@ -56,6 +56,10 @@ var ExpeditionTask = /** @class */ (function () {
         this._expedition = expedition;
         this._timing = timing;
         this._fleetIndex = fleetIndex;
+        this.rx = Constant.TASK_WIDTH * fleetIndex + Constant.CANVAS_HOUR_MARGIN;
+        this.ry = Constant.TASK_HEIGHT_PER_TIME * timing;
+        this.tx = this.rx;
+        this.ty = this.ry + 18 + 2;
     }
     Object.defineProperty(ExpeditionTask.prototype, "expedition", {
         get: function () { return this._expedition; },
@@ -212,6 +216,7 @@ var MainController = /** @class */ (function () {
      * 遠征スケジュールを再描画する
      */
     MainController.prototype.redrawCanvas = function () {
+        var _this = this;
         // 遠征タスクをまとめて消去
         this.canvas.selectAll("g").remove();
         // 遠征タスクをまとめて描画するための下地
@@ -220,18 +225,14 @@ var MainController = /** @class */ (function () {
             .enter()
             .append("g")
             .call(d3.drag()
-            .on("start", this.dragstartedTask)
-            .on("drag", this.draggedTask)
-            .on("end", this.dragendedTask));
+            .on("start", function (task, index) { return _this.dragstartedTask(task, index); })
+            .on("drag", function (task, index) { return _this.draggedTask(task, index); })
+            .on("end", function (task, index) { return _this.dragendedTask(task, index); }));
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
         tasks.append("rect")
-            .attr("x", function (task) {
-            return Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN;
-        })
-            .attr("y", function (task) {
-            return Constant.TASK_HEIGHT_PER_TIME * task.timing;
-        })
+            .attr("x", function (task) { return task.rx; })
+            .attr("y", function (task) { return task.ry; })
             .attr("width", Constant.TASK_WIDTH)
             .attr("height", function (task) {
             return Constant.TASK_HEIGHT_PER_TIME * task.expedition.time;
@@ -241,12 +242,8 @@ var MainController = /** @class */ (function () {
             .attr("fill", "skyblue");
         // (文字は18pxで、遠征タスク枠の左上に横向きで描画)
         tasks.append("text")
-            .attr("x", function (task) {
-            return Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN + 2;
-        })
-            .attr("y", function (task) {
-            return Constant.TASK_HEIGHT_PER_TIME * task.timing + 18 + 2;
-        })
+            .attr("x", function (task) { return task.tx; })
+            .attr("y", function (task) { return task.ty; })
             .attr("font-size", "18px")
             .text(function (task) {
             return task.expedition.name;
@@ -255,33 +252,33 @@ var MainController = /** @class */ (function () {
     MainController.prototype.test = function () {
         this.expTaskList.length = 0;
         this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 0, 2));
-        this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 100, 1));
-        this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 200, 0));
+        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒", 100, 1));
+        this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦", 200, 0));
     };
     /**
      * ドラッグスタート時に呼び出される関数
      */
-    MainController.prototype.dragstartedTask = function (d) {
-        console.log('start');
+    MainController.prototype.dragstartedTask = function (d, i) {
     };
     /**
      * ドラッグ中に呼び出される関数
      */
-    MainController.prototype.draggedTask = function (d) {
-        console.log('medium');
-        console.log('' + d3.event.subject.x + ',' + d3.event.subject.y + '|' + d.x + ',' + d.y + '|' + d3.event.x + ',' + d3.event.y + '|' + d3.event.dx + ',' + d3.event.dy);
-        d3.select("g > text")
-            .attr("x", d.x = d3.event.x + 2)
-            .attr("y", d.y = d3.event.y + 18 + 2);
-        d3.select("g > rect")
-            .attr("x", d.x = d3.event.x)
-            .attr("y", d.y = d3.event.y);
+    MainController.prototype.draggedTask = function (data, index) {
+        data.tx += d3.event.dx;
+        data.ty += d3.event.dy;
+        data.rx += d3.event.dx;
+        data.ry += d3.event.dy;
+        d3.selectAll("g > text").filter(function (d, i) { return (i === index); })
+            .attr("x", data.tx)
+            .attr("y", data.ty);
+        d3.selectAll("g > rect").filter(function (d, i) { return (i === index); })
+            .attr("x", data.rx)
+            .attr("y", data.ry);
     };
     /**
      * ドラッグ終了時に呼び出される関数
      */
-    MainController.prototype.dragendedTask = function (d) {
-        console.log('end');
+    MainController.prototype.dragendedTask = function (d, i) {
     };
     return MainController;
 }());
