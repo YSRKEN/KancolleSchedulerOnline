@@ -215,10 +215,14 @@ var MainController = /** @class */ (function () {
         // 遠征タスクをまとめて消去
         this.canvas.selectAll("g").remove();
         // 遠征タスクをまとめて描画するための下地
-        var tasks = this.canvas.selectAll("boxes")
+        var tasks = this.canvas.selectAll("g")
             .data(this.expTaskList)
             .enter()
-            .append("g");
+            .append("g")
+            .call(d3.drag()
+            .on("start", this.dragstartedTask)
+            .on("drag", this.draggedTask)
+            .on("end", this.dragendedTask));
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
         tasks.append("rect")
@@ -247,10 +251,6 @@ var MainController = /** @class */ (function () {
             .text(function (task) {
             return task.expedition.name;
         });
-        this.canvas.selectAll("g").call(d3.drag()
-            .on("start", this.dragstartedTask)
-            .on("drag", this.draggedTask)
-            .on("end", this.dragendedTask));
     };
     MainController.prototype.test = function () {
         this.expTaskList.length = 0;
@@ -261,22 +261,26 @@ var MainController = /** @class */ (function () {
     /**
      * ドラッグスタート時に呼び出される関数
      */
-    MainController.prototype.dragstartedTask = function () {
+    MainController.prototype.dragstartedTask = function (d) {
         console.log('start');
     };
     /**
      * ドラッグ中に呼び出される関数
      */
-    MainController.prototype.draggedTask = function () {
+    MainController.prototype.draggedTask = function (d) {
         console.log('medium');
-        d3.event.subject.x += d3.event.dx;
-        d3.event.subject.y += d3.event.dy;
-        console.log('' + d3.event.subject.x + ',' + d3.event.subject.y + '|' + d3.event.x + ',' + d3.event.y + '|' + d3.event.dx + ',' + d3.event.dy);
+        console.log('' + d3.event.subject.x + ',' + d3.event.subject.y + '|' + d.x + ',' + d.y + '|' + d3.event.x + ',' + d3.event.y + '|' + d3.event.dx + ',' + d3.event.dy);
+        d3.select("g > text")
+            .attr("x", d.x = d3.event.x + 2)
+            .attr("y", d.y = d3.event.y + 18 + 2);
+        d3.select("g > rect")
+            .attr("x", d.x = d3.event.x)
+            .attr("y", d.y = d3.event.y);
     };
     /**
      * ドラッグ終了時に呼び出される関数
      */
-    MainController.prototype.dragendedTask = function () {
+    MainController.prototype.dragendedTask = function (d) {
         console.log('end');
     };
     return MainController;
