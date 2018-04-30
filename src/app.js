@@ -149,6 +149,13 @@ var MainController = /** @class */ (function () {
          * 遠征タスクの一覧
          */
         this.expTaskList = new Array();
+        /**
+         * 遠征スケジュールを描画するための盤面
+         * 型推論させるため、意図的にここで代入している
+         */
+        this.canvas = d3.select("#canvas").append("svg")
+            .attr("width", Constant.CANVAS_WIDTH)
+            .attr("height", Constant.CANVAS_HEIGHT);
         // expTaskListを初期化
         this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒", 95, 0));
         this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務", 95, 1));
@@ -171,10 +178,6 @@ var MainController = /** @class */ (function () {
      * 遠征タスクを初期化
      */
     MainController.prototype.initializeCanvas = function () {
-        // SVG要素でcanvasを作成
-        this.canvas = d3.select("#canvas").append("svg")
-            .attr("width", Constant.CANVAS_WIDTH)
-            .attr("height", Constant.CANVAS_HEIGHT);
         // 縦方向の罫線
         // (太さ1の黒い実線)
         for (var w = 0; w <= Constant.FLEET_COUNT; ++w) {
@@ -265,7 +268,7 @@ window.onload = function () {
     var mc = new MainController();
     // 画面を再描画
     mc.redrawCanvas();
-    //mc.test();
+    mc.test();
     mc.redrawCanvas();
 };
 //# sourceMappingURL=app.js.map

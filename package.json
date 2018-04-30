@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "dependencies": {
+    "@types/d3": "^5.0.0",
     "d3": "^5.1.0",
     "typescript": "^2.8.3"
   },

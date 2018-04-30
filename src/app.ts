@@ -145,16 +145,15 @@ class MainController {
     private expTaskList: Array<ExpeditionTask> = new Array<ExpeditionTask>();
     /**
      * 遠征スケジュールを描画するための盤面
+     * 型推論させるため、意図的にここで代入している
      */
-    private canvas;
+    private canvas = d3.select("#canvas").append("svg")
+        .attr("width", Constant.CANVAS_WIDTH)
+        .attr("height", Constant.CANVAS_HEIGHT);
     /**
      * 遠征タスクを初期化
      */
     private initializeCanvas(){
-        // SVG要素でcanvasを作成
-        this.canvas = d3.select("#canvas").append("svg")
-            .attr("width", Constant.CANVAS_WIDTH)
-            .attr("height", Constant.CANVAS_HEIGHT);
         // 縦方向の罫線
         // (太さ1の黒い実線)
         for(var w = 0; w <= Constant.FLEET_COUNT; ++w){
