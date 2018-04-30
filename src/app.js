@@ -247,12 +247,37 @@ var MainController = /** @class */ (function () {
             .text(function (task) {
             return task.expedition.name;
         });
+        this.canvas.selectAll("g").call(d3.drag()
+            .on("start", this.dragstartedTask)
+            .on("drag", this.draggedTask)
+            .on("end", this.dragendedTask));
     };
     MainController.prototype.test = function () {
         this.expTaskList.length = 0;
         this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 0, 2));
         this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 100, 1));
         this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務", 200, 0));
+    };
+    /**
+     * ドラッグスタート時に呼び出される関数
+     */
+    MainController.prototype.dragstartedTask = function () {
+        console.log('start');
+    };
+    /**
+     * ドラッグ中に呼び出される関数
+     */
+    MainController.prototype.draggedTask = function () {
+        console.log('medium');
+        d3.event.subject.x += d3.event.dx;
+        d3.event.subject.y += d3.event.dy;
+        console.log('' + d3.event.subject.x + ',' + d3.event.subject.y + '|' + d3.event.x + ',' + d3.event.y + '|' + d3.event.dx + ',' + d3.event.dy);
+    };
+    /**
+     * ドラッグ終了時に呼び出される関数
+     */
+    MainController.prototype.dragendedTask = function () {
+        console.log('end');
     };
     return MainController;
 }());
