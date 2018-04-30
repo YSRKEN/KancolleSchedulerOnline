@@ -138,6 +138,113 @@ class Constant{
     static CANVAS_HEIGHT: number = Constant.TASK_HEIGHT_PER_TIME * Constant.ALL_TIMES;
 };
 
+class MainController {
+    /**
+     * 遠征タスクの一覧
+     */
+    private expTaskList: Array<ExpeditionTask> = new Array<ExpeditionTask>();
+    /**
+     * 遠征スケジュールを描画するための盤面
+     */
+    private canvas = d3.select("#canvas").append("svg")
+        .attr("width", Constant.CANVAS_WIDTH)
+        .attr("height", Constant.CANVAS_HEIGHT);
+    /**
+     * 遠征スケジュールを再描画する
+     */
+    redrawCanvas(){
+        this.canvas.selectAll("*").remove();
+        // 縦方向の罫線
+        // (太さ1の黒い実線)
+        for(var w = 0; w <= Constant.FLEET_COUNT; ++w){
+            this.canvas.append("line")
+                .attr("x1", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
+                .attr("x2", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
+                .attr("y1", 0)
+                .attr("y2", Constant.CANVAS_HEIGHT)
+                .attr("stroke-width", 1)
+                .attr("stroke", "black");
+        }
+        // 横方向の罫線
+        // (太さ1の黒い実線)
+        for(var h = 0; h <= 24; ++h){
+            this.canvas.append("line")
+                .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
+                .attr("y2", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
+                .attr("x1", 0 + Constant.CANVAS_HOUR_MARGIN)
+                .attr("x2", Constant.CANVAS_WIDTH + Constant.CANVAS_HOUR_MARGIN)
+                .attr("stroke-width", 1)
+                .attr("stroke", "black");
+            var hour = (h + 5) % 24;
+            var hourString = hour.toString() + ":00";
+            this.canvas.append("text")
+                .attr("x", Constant.CANVAS_HOUR_MARGIN - hourString.length * 18 / 2)
+                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + (h == 0 ? 18 : 9))
+                .attr("font-size", "18px")
+                .text(hourString);
+        }
+        // 遠征タスクをまとめて描画するための下地
+        var tasks = this.canvas.selectAll("boxes")
+            .data(this.expTaskList)
+            .enter()
+            .append("g");
+        // 遠征タスクをまとめて描画
+        // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
+        tasks.append("rect")
+            .attr("x",function(task){
+                return Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN;
+            })
+            .attr("y",function(task){
+                return Constant.TASK_HEIGHT_PER_TIME * task.timing;
+            })
+            .attr("width",Constant.TASK_WIDTH)
+            .attr("height",function(task){
+                return Constant.TASK_HEIGHT_PER_TIME * task.expedition.time;
+            })
+            .attr("stroke", "black")
+            .style("opacity", 0.8)
+            .attr("fill","skyblue");
+        // (文字は18pxで、遠征タスク枠の左上に横向きで描画)
+        tasks.append("text")
+            .attr("x",function(task){
+                return Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN + 2;
+            })
+            .attr("y",function(task){
+                return Constant.TASK_HEIGHT_PER_TIME * task.timing + 18 + 2;
+            })
+            .attr("font-size", "18px")
+            .text(function(task){
+                return task.expedition.name;
+            });
+    }
+    test(){
+        this.expTaskList.length = 0;
+        this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務",0,2));
+        this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務",100,1));
+        this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務",200,0));
+    }
+    /**
+     * コンストラクタ
+     */
+    constructor(){
+        // expTaskListを初期化
+        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",95,0));
+        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",95,1));
+        this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",95,2));
+        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",230,0));
+        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",185,1));
+        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",425,0));
+        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",815,0));
+        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",950,0));
+        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",425,1));
+        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",815,1));
+        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",905,1));
+        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",995,1));
+        this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",425,2));
+        this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",815,2));
+    }
+};
+
 /**
  * スタートアップ
  */
@@ -145,86 +252,10 @@ window.onload = () => {
     var element = document.getElementById("taskList");
     // データベースを初期化
     DataStore.initialize();
-    // 遠征タスクを作成
-    var expTaskList = new Array<ExpeditionTask>();
-    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",95,0));
-    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",95,1));
-    expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",95,2));
-    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",230,0));
-    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",185,1));
-    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",425,0));
-    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",815,0));
-    expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",950,0));
-    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",425,1));
-    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",815,1));
-    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",905,1));
-    expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",995,1));
-    expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",425,2));
-    expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",815,2));
-    // 遠征タスクを表示する
-    /*for (var i = 0; i < expTaskList.length; ++i) {
-        var expTask = expTaskList[i];
-        element.innerText += "・" + expTask.expedition.areaName + "―";
-        element.innerText += expTask.expedition.name + "　";
-        element.innerText += "タイミング：" + expTask.timing + "　";
-        element.innerText += "第" + expTask.fleetIndex + "艦隊\n";
-    }*/
-    // 遠征タスクを描画する
-    var canvas = d3.select("#canvas").append("svg")
-        .attr("width", Constant.CANVAS_WIDTH)
-        .attr("height", Constant.CANVAS_HEIGHT);
-    for(var w = 0; w <= Constant.FLEET_COUNT; ++w){
-        canvas.append("line")
-            .attr("x1", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
-            .attr("x2", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
-            .attr("y1", 0)
-            .attr("y2", Constant.CANVAS_HEIGHT)
-            .attr("stroke-width", 1)
-            .attr("stroke", "black");
-    }
-    for(var h = 0; h <= 24; ++h){
-        canvas.append("line")
-            .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
-            .attr("y2", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
-            .attr("x1", 0 + Constant.CANVAS_HOUR_MARGIN)
-            .attr("x2", Constant.CANVAS_WIDTH + Constant.CANVAS_HOUR_MARGIN)
-            .attr("stroke-width", 1)
-            .attr("stroke", "black");
-        var hour = (h + 5) % 24;
-        var hourString = hour.toString() + ":00";
-        canvas.append("text")
-            .attr("x", Constant.CANVAS_HOUR_MARGIN - hourString.length * 18 / 2)
-            .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + (h == 0 ? 18 : 9))
-            .attr("font-size", "18px")
-            .text(hourString);
-    }
-    var tasks = canvas.selectAll("boxes")
-        .data(expTaskList)
-        .enter()
-        .append("g");
-    tasks.append("rect")
-        .attr("x",function(task){
-            return Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN;
-        })
-        .attr("y",function(task){
-            return Constant.TASK_HEIGHT_PER_TIME * task.timing;
-        })
-        .attr("width",Constant.TASK_WIDTH)
-        .attr("height",function(task){
-            return Constant.TASK_HEIGHT_PER_TIME * task.expedition.time;
-        })
-        .attr("stroke", "black")
-        .style("opacity", 0.8)
-        .attr("fill","skyblue");
-    tasks.append("text")
-        .attr("x",function(task){
-            return Constant.TASK_WIDTH * task.fleetIndex + Constant.CANVAS_HOUR_MARGIN + 2;
-        })
-        .attr("y",function(task){
-            return Constant.TASK_HEIGHT_PER_TIME * task.timing + 18 + 2;
-        })
-        .attr("font-size", "18px")
-        .text(function(task){
-            return task.expedition.name;
-        });
+    // Controllerを初期化
+    var mc = new MainController();
+    // 画面を再描画
+    mc.redrawCanvas();
+    mc.test();
+    mc.redrawCanvas();
 };
