@@ -146,14 +146,15 @@ class MainController {
     /**
      * 遠征スケジュールを描画するための盤面
      */
-    private canvas = d3.select("#canvas").append("svg")
-        .attr("width", Constant.CANVAS_WIDTH)
-        .attr("height", Constant.CANVAS_HEIGHT);
+    private canvas;
     /**
-     * 遠征スケジュールを再描画する
+     * 遠征タスクを初期化
      */
-    redrawCanvas(){
-        this.canvas.selectAll("*").remove();
+    private initializeCanvas(){
+        // SVG要素でcanvasを作成
+        this.canvas = d3.select("#canvas").append("svg")
+            .attr("width", Constant.CANVAS_WIDTH)
+            .attr("height", Constant.CANVAS_HEIGHT);
         // 縦方向の罫線
         // (太さ1の黒い実線)
         for(var w = 0; w <= Constant.FLEET_COUNT; ++w){
@@ -165,8 +166,8 @@ class MainController {
                 .attr("stroke-width", 1)
                 .attr("stroke", "black");
         }
-        // 横方向の罫線
-        // (太さ1の黒い実線)
+        // 横方向の罫線と時刻表示
+        // (太さ1の黒い実線、文字は18pxで遠征スケジュールの左側に表示)
         for(var h = 0; h <= 24; ++h){
             this.canvas.append("line")
                 .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
@@ -179,10 +180,17 @@ class MainController {
             var hourString = hour.toString() + ":00";
             this.canvas.append("text")
                 .attr("x", Constant.CANVAS_HOUR_MARGIN - hourString.length * 18 / 2)
-                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + (h == 0 ? 18 : 9))
+                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + (h == 0 ? 18 : h == 24 ? 0 : 9))
                 .attr("font-size", "18px")
                 .text(hourString);
         }
+    }
+    /**
+     * 遠征スケジュールを再描画する
+     */
+    redrawCanvas(){
+        // 遠征タスクをまとめて消去
+        this.canvas.selectAll("g").remove();
         // 遠征タスクをまとめて描画するための下地
         var tasks = this.canvas.selectAll("boxes")
             .data(this.expTaskList)
@@ -242,6 +250,8 @@ class MainController {
         this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",995,1));
         this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",425,2));
         this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",815,2));
+        // canvasを初期化
+        this.initializeCanvas();
     }
 };
 

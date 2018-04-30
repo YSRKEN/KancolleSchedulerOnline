@@ -149,12 +149,6 @@ var MainController = /** @class */ (function () {
          * 遠征タスクの一覧
          */
         this.expTaskList = new Array();
-        /**
-         * 遠征スケジュールを描画するための盤面
-         */
-        this.canvas = d3.select("#canvas").append("svg")
-            .attr("width", Constant.CANVAS_WIDTH)
-            .attr("height", Constant.CANVAS_HEIGHT);
         // expTaskListを初期化
         this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒", 95, 0));
         this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務", 95, 1));
@@ -170,12 +164,17 @@ var MainController = /** @class */ (function () {
         this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務", 995, 1));
         this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦", 425, 2));
         this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦", 815, 2));
+        // canvasを初期化
+        this.initializeCanvas();
     }
     /**
-     * 遠征スケジュールを再描画する
+     * 遠征タスクを初期化
      */
-    MainController.prototype.redrawCanvas = function () {
-        this.canvas.selectAll("*").remove();
+    MainController.prototype.initializeCanvas = function () {
+        // SVG要素でcanvasを作成
+        this.canvas = d3.select("#canvas").append("svg")
+            .attr("width", Constant.CANVAS_WIDTH)
+            .attr("height", Constant.CANVAS_HEIGHT);
         // 縦方向の罫線
         // (太さ1の黒い実線)
         for (var w = 0; w <= Constant.FLEET_COUNT; ++w) {
@@ -187,8 +186,8 @@ var MainController = /** @class */ (function () {
                 .attr("stroke-width", 1)
                 .attr("stroke", "black");
         }
-        // 横方向の罫線
-        // (太さ1の黒い実線)
+        // 横方向の罫線と時刻表示
+        // (太さ1の黒い実線、文字は18pxで遠征スケジュールの左側に表示)
         for (var h = 0; h <= 24; ++h) {
             this.canvas.append("line")
                 .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
@@ -201,10 +200,17 @@ var MainController = /** @class */ (function () {
             var hourString = hour.toString() + ":00";
             this.canvas.append("text")
                 .attr("x", Constant.CANVAS_HOUR_MARGIN - hourString.length * 18 / 2)
-                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + (h == 0 ? 18 : 9))
+                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + (h == 0 ? 18 : h == 24 ? 0 : 9))
                 .attr("font-size", "18px")
                 .text(hourString);
         }
+    };
+    /**
+     * 遠征スケジュールを再描画する
+     */
+    MainController.prototype.redrawCanvas = function () {
+        // 遠征タスクをまとめて消去
+        this.canvas.selectAll("g").remove();
         // 遠征タスクをまとめて描画するための下地
         var tasks = this.canvas.selectAll("boxes")
             .data(this.expTaskList)
@@ -259,7 +265,7 @@ window.onload = function () {
     var mc = new MainController();
     // 画面を再描画
     mc.redrawCanvas();
-    mc.test();
+    //mc.test();
     mc.redrawCanvas();
 };
 //# sourceMappingURL=app.js.map
