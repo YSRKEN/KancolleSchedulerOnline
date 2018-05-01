@@ -194,7 +194,7 @@ class Utility{
      * 横座標→艦隊番号
      */
     static xToFleetIndex(x: number){
-        return Math.floor(Utility.Limit((x - Constant.CANVAS_HOUR_MARGIN) / Constant.TASK_WIDTH, 0, Constant.FLEET_COUNT));
+        return Math.floor(Utility.Limit((x + Constant.TASK_WIDTH / 2 - Constant.CANVAS_HOUR_MARGIN) / Constant.TASK_WIDTH, 0, Constant.FLEET_COUNT - 1));
     }
 };
 
