@@ -217,13 +217,14 @@ class MainController {
             .append("g")
             .call(
                 d3.drag<SVGElement, ExpeditionTask>()
-                    .on("start", (task, index) => this.dragstartedTask(task, index))
-                    .on("drag", (task, index) => this.draggedTask(task, index))
-                    .on("end", (task, index) => this.dragendedTask(task, index))
+                    .on("start", this.dragstartedTask)
+                    .on("drag", this.draggedTask)
+                    .on("end", this.dragendedTask)
             );
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
         tasks.append("rect")
+            .classed("movable", true)
             .attr("x", function(task) { return task.rx; })
             .attr("y", function(task) { return task.ry; })
             .attr("width",Constant.TASK_WIDTH)
@@ -235,6 +236,7 @@ class MainController {
             .attr("fill","skyblue");
         // (文字は18pxで、遠征タスク枠の左上に横向きで描画)
         tasks.append("text")
+            .classed("movable", true)
             .attr("x", function(task) { return task.tx; })
             .attr("y", function(task) { return task.ty; })
             .attr("font-size", "18px")
@@ -251,7 +253,7 @@ class MainController {
     /**
      * ドラッグスタート時に呼び出される関数
      */
-     private dragstartedTask(d: ExpeditionTask, i: number) {
+     private dragstartedTask() {
     }
     /**
      * ドラッグ中に呼び出される関数
@@ -271,7 +273,7 @@ class MainController {
     /**
      * ドラッグ終了時に呼び出される関数
      */
-    private dragendedTask(d: ExpeditionTask, i: number) {
+    private dragendedTask() {
     }
     /**
      * コンストラクタ

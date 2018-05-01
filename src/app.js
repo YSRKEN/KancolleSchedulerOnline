@@ -216,7 +216,6 @@ var MainController = /** @class */ (function () {
      * 遠征スケジュールを再描画する
      */
     MainController.prototype.redrawCanvas = function () {
-        var _this = this;
         // 遠征タスクをまとめて消去
         this.canvas.selectAll("g").remove();
         // 遠征タスクをまとめて描画するための下地
@@ -225,12 +224,13 @@ var MainController = /** @class */ (function () {
             .enter()
             .append("g")
             .call(d3.drag()
-            .on("start", function (task, index) { return _this.dragstartedTask(task, index); })
-            .on("drag", function (task, index) { return _this.draggedTask(task, index); })
-            .on("end", function (task, index) { return _this.dragendedTask(task, index); }));
+            .on("start", this.dragstartedTask)
+            .on("drag", this.draggedTask)
+            .on("end", this.dragendedTask));
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
         tasks.append("rect")
+            .classed("movable", true)
             .attr("x", function (task) { return task.rx; })
             .attr("y", function (task) { return task.ry; })
             .attr("width", Constant.TASK_WIDTH)
@@ -242,6 +242,7 @@ var MainController = /** @class */ (function () {
             .attr("fill", "skyblue");
         // (文字は18pxで、遠征タスク枠の左上に横向きで描画)
         tasks.append("text")
+            .classed("movable", true)
             .attr("x", function (task) { return task.tx; })
             .attr("y", function (task) { return task.ty; })
             .attr("font-size", "18px")
@@ -258,7 +259,7 @@ var MainController = /** @class */ (function () {
     /**
      * ドラッグスタート時に呼び出される関数
      */
-    MainController.prototype.dragstartedTask = function (d, i) {
+    MainController.prototype.dragstartedTask = function () {
     };
     /**
      * ドラッグ中に呼び出される関数
@@ -278,7 +279,7 @@ var MainController = /** @class */ (function () {
     /**
      * ドラッグ終了時に呼び出される関数
      */
-    MainController.prototype.dragendedTask = function (d, i) {
+    MainController.prototype.dragendedTask = function () {
     };
     return MainController;
 }());
