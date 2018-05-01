@@ -88,9 +88,9 @@ class ExpeditionTask {
         this._timing = timing;
         this._fleetIndex = fleetIndex;
         this.rx = Constant.TASK_WIDTH * fleetIndex + Constant.CANVAS_HOUR_MARGIN;
-        this.ry = Constant.TASK_HEIGHT_PER_TIME * timing;
+        this.ry = Constant.TASK_HEIGHT_PER_TIME * timing + Constant.CANVAS_HEIGHT_MARGIN;
         this.tx = this.rx;
-        this.ty = this.ry + 18 + 2;
+        this.ty = this.ry + 18 + 2 + Constant.CANVAS_HEIGHT_MARGIN;
     }
 };
 
@@ -149,13 +149,17 @@ class Constant{
      */
     static CANVAS_HOUR_MARGIN: number = 50;
     /**
+     * 上下方向の余白
+     */
+    static CANVAS_HEIGHT_MARGIN: number = 20;
+    /**
      * スケジュール表示の横幅
      */
     static CANVAS_WIDTH: number = Constant.TASK_WIDTH * Constant.FLEET_COUNT + Constant.CANVAS_HOUR_MARGIN;
     /**
      * スケジュール表示の縦幅
      */
-    static CANVAS_HEIGHT: number = Constant.TASK_HEIGHT_PER_TIME * Constant.ALL_TIMES;
+    static CANVAS_HEIGHT: number = Constant.TASK_HEIGHT_PER_TIME * Constant.ALL_TIMES + Constant.CANVAS_HEIGHT_MARGIN * 2;
 };
 
 class MainController {
@@ -171,6 +175,12 @@ class MainController {
         .attr("width", Constant.CANVAS_WIDTH)
         .attr("height", Constant.CANVAS_HEIGHT);
     /**
+     * タイミング→縦座標
+     */
+    private static timingToHeight(timing: number){
+
+    }
+    /**
      * 遠征タスクを初期化
      */
     private initializeCanvas(){
@@ -180,8 +190,8 @@ class MainController {
             this.canvas.append("line")
                 .attr("x1", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
                 .attr("x2", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
-                .attr("y1", 0)
-                .attr("y2", Constant.CANVAS_HEIGHT)
+                .attr("y1", Constant.CANVAS_HEIGHT_MARGIN)
+                .attr("y2", Constant.CANVAS_HEIGHT - Constant.CANVAS_HEIGHT_MARGIN)
                 .attr("stroke-width", 1)
                 .attr("stroke", "black");
         }
@@ -189,8 +199,8 @@ class MainController {
         // (太さ1の黒い実線、文字は18pxで遠征スケジュールの左側に表示)
         for(var h = 0; h <= 24; ++h){
             this.canvas.append("line")
-                .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
-                .attr("y2", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
+                .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h + Constant.CANVAS_HEIGHT_MARGIN)
+                .attr("y2", Constant.TASK_HEIGHT_PER_TIME * 60 * h + Constant.CANVAS_HEIGHT_MARGIN)
                 .attr("x1", 0 + Constant.CANVAS_HOUR_MARGIN)
                 .attr("x2", Constant.CANVAS_WIDTH + Constant.CANVAS_HOUR_MARGIN)
                 .attr("stroke-width", 1)
@@ -199,7 +209,7 @@ class MainController {
             var hourString = hour.toString() + ":00";
             this.canvas.append("text")
                 .attr("x", Constant.CANVAS_HOUR_MARGIN - hourString.length * 18 / 2)
-                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + (h == 0 ? 18 : h == 24 ? 0 : 9))
+                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + 9 + Constant.CANVAS_HEIGHT_MARGIN)
                 .attr("font-size", "18px")
                 .text(hourString);
         }
@@ -273,7 +283,8 @@ class MainController {
     /**
      * ドラッグ終了時に呼び出される関数
      */
-    private dragendedTask() {
+    private dragendedTask(data: ExpeditionTask, index: number) {
+
     }
     /**
      * コンストラクタ

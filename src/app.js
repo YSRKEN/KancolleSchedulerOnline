@@ -57,9 +57,9 @@ var ExpeditionTask = /** @class */ (function () {
         this._timing = timing;
         this._fleetIndex = fleetIndex;
         this.rx = Constant.TASK_WIDTH * fleetIndex + Constant.CANVAS_HOUR_MARGIN;
-        this.ry = Constant.TASK_HEIGHT_PER_TIME * timing;
+        this.ry = Constant.TASK_HEIGHT_PER_TIME * timing + Constant.CANVAS_HEIGHT_MARGIN;
         this.tx = this.rx;
-        this.ty = this.ry + 18 + 2;
+        this.ty = this.ry + 18 + 2 + Constant.CANVAS_HEIGHT_MARGIN;
     }
     Object.defineProperty(ExpeditionTask.prototype, "expedition", {
         get: function () { return this._expedition; },
@@ -134,13 +134,17 @@ var Constant = /** @class */ (function () {
      */
     Constant.CANVAS_HOUR_MARGIN = 50;
     /**
+     * 上下方向の余白
+     */
+    Constant.CANVAS_HEIGHT_MARGIN = 20;
+    /**
      * スケジュール表示の横幅
      */
     Constant.CANVAS_WIDTH = Constant.TASK_WIDTH * Constant.FLEET_COUNT + Constant.CANVAS_HOUR_MARGIN;
     /**
      * スケジュール表示の縦幅
      */
-    Constant.CANVAS_HEIGHT = Constant.TASK_HEIGHT_PER_TIME * Constant.ALL_TIMES;
+    Constant.CANVAS_HEIGHT = Constant.TASK_HEIGHT_PER_TIME * Constant.ALL_TIMES + Constant.CANVAS_HEIGHT_MARGIN * 2;
     return Constant;
 }());
 ;
@@ -179,6 +183,11 @@ var MainController = /** @class */ (function () {
         this.initializeCanvas();
     }
     /**
+     * タイミング→縦座標
+     */
+    MainController.timingToHeight = function (timing) {
+    };
+    /**
      * 遠征タスクを初期化
      */
     MainController.prototype.initializeCanvas = function () {
@@ -188,8 +197,8 @@ var MainController = /** @class */ (function () {
             this.canvas.append("line")
                 .attr("x1", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
                 .attr("x2", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
-                .attr("y1", 0)
-                .attr("y2", Constant.CANVAS_HEIGHT)
+                .attr("y1", Constant.CANVAS_HEIGHT_MARGIN)
+                .attr("y2", Constant.CANVAS_HEIGHT - Constant.CANVAS_HEIGHT_MARGIN)
                 .attr("stroke-width", 1)
                 .attr("stroke", "black");
         }
@@ -197,8 +206,8 @@ var MainController = /** @class */ (function () {
         // (太さ1の黒い実線、文字は18pxで遠征スケジュールの左側に表示)
         for (var h = 0; h <= 24; ++h) {
             this.canvas.append("line")
-                .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
-                .attr("y2", Constant.TASK_HEIGHT_PER_TIME * 60 * h)
+                .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h + Constant.CANVAS_HEIGHT_MARGIN)
+                .attr("y2", Constant.TASK_HEIGHT_PER_TIME * 60 * h + Constant.CANVAS_HEIGHT_MARGIN)
                 .attr("x1", 0 + Constant.CANVAS_HOUR_MARGIN)
                 .attr("x2", Constant.CANVAS_WIDTH + Constant.CANVAS_HOUR_MARGIN)
                 .attr("stroke-width", 1)
@@ -207,7 +216,7 @@ var MainController = /** @class */ (function () {
             var hourString = hour.toString() + ":00";
             this.canvas.append("text")
                 .attr("x", Constant.CANVAS_HOUR_MARGIN - hourString.length * 18 / 2)
-                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + (h == 0 ? 18 : h == 24 ? 0 : 9))
+                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + 9 + Constant.CANVAS_HEIGHT_MARGIN)
                 .attr("font-size", "18px")
                 .text(hourString);
         }
@@ -279,7 +288,7 @@ var MainController = /** @class */ (function () {
     /**
      * ドラッグ終了時に呼び出される関数
      */
-    MainController.prototype.dragendedTask = function () {
+    MainController.prototype.dragendedTask = function (data, index) {
     };
     return MainController;
 }());
