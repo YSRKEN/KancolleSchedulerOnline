@@ -87,8 +87,8 @@ class ExpeditionTask {
         this._expedition = expedition;
         this._timing = timing;
         this._fleetIndex = fleetIndex;
-        this.rx = Constant.TASK_WIDTH * fleetIndex + Constant.CANVAS_HOUR_MARGIN;
-        this.ry = Constant.TASK_HEIGHT_PER_TIME * timing + Constant.CANVAS_HEIGHT_MARGIN;
+        this.rx = Utility.fleetIndexToX(fleetIndex);
+        this.ry = Utility.timingToY(timing);
         this.tx = this.rx;
         this.ty = this.ry + 18 + 2;
     }
@@ -218,10 +218,10 @@ class MainController {
         // (太さ1の黒い実線)
         for(var w = 0; w <= Constant.FLEET_COUNT; ++w){
             this.canvas.append("line")
-                .attr("x1", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
-                .attr("x2", Constant.TASK_WIDTH * w + Constant.CANVAS_HOUR_MARGIN)
-                .attr("y1", Constant.CANVAS_HEIGHT_MARGIN)
-                .attr("y2", Constant.CANVAS_HEIGHT - Constant.CANVAS_HEIGHT_MARGIN)
+                .attr("x1", Utility.fleetIndexToX(w))
+                .attr("x2", Utility.fleetIndexToX(w))
+                .attr("y1", Utility.timingToY(0))
+                .attr("y2", Utility.timingToY(Constant.ALL_TIMES))
                 .attr("stroke-width", 1)
                 .attr("stroke", "black");
         }
@@ -229,10 +229,10 @@ class MainController {
         // (太さ1の黒い実線、文字は18pxで遠征スケジュールの左側に表示)
         for(var h = 0; h <= 24; ++h){
             this.canvas.append("line")
-                .attr("y1", Constant.TASK_HEIGHT_PER_TIME * 60 * h + Constant.CANVAS_HEIGHT_MARGIN)
-                .attr("y2", Constant.TASK_HEIGHT_PER_TIME * 60 * h + Constant.CANVAS_HEIGHT_MARGIN)
-                .attr("x1", 0 + Constant.CANVAS_HOUR_MARGIN)
-                .attr("x2", Constant.CANVAS_WIDTH + Constant.CANVAS_HOUR_MARGIN)
+                .attr("y1", Utility.timingToY(60 * h))
+                .attr("y2", Utility.timingToY(60 * h))
+                .attr("x1", Utility.fleetIndexToX(0))
+                .attr("x2", Utility.fleetIndexToX(Constant.FLEET_COUNT + 1))
                 .attr("stroke-width", 1)
                 .attr("stroke", "black");
             var hour = (h + 5) % 24;
