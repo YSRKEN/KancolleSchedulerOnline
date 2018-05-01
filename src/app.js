@@ -59,7 +59,7 @@ var ExpeditionTask = /** @class */ (function () {
         this.rx = Constant.TASK_WIDTH * fleetIndex + Constant.CANVAS_HOUR_MARGIN;
         this.ry = Constant.TASK_HEIGHT_PER_TIME * timing + Constant.CANVAS_HEIGHT_MARGIN;
         this.tx = this.rx;
-        this.ty = this.ry + 18 + 2 + Constant.CANVAS_HEIGHT_MARGIN;
+        this.ty = this.ry + 18 + 2;
     }
     Object.defineProperty(ExpeditionTask.prototype, "expedition", {
         get: function () { return this._expedition; },
@@ -148,6 +148,45 @@ var Constant = /** @class */ (function () {
     return Constant;
 }());
 ;
+var Utility = /** @class */ (function () {
+    function Utility() {
+    }
+    /**
+     * 入力値を[min, max]に丸める
+     * @param x 入力値
+     * @param min 最小値
+     * @param max 最大値
+     */
+    Utility.Limit = function (x, min, max) {
+        return (x < min ? min : x > max ? max : x);
+    };
+    /**
+     * タイミング→縦座標
+     */
+    Utility.timingToY = function (timing) {
+        return Constant.TASK_HEIGHT_PER_TIME * timing + Constant.CANVAS_HEIGHT_MARGIN;
+    };
+    /**
+     * 艦隊番号→横座標
+     */
+    Utility.fleetIndexToX = function (fleetIndex) {
+        return Constant.TASK_WIDTH * fleetIndex + Constant.CANVAS_HOUR_MARGIN;
+    };
+    /**
+     * 縦座標→タイミング
+     */
+    Utility.yToTiming = function (y) {
+        return Math.floor(Utility.Limit((y - Constant.CANVAS_HEIGHT_MARGIN) / Constant.TASK_HEIGHT_PER_TIME, 0, Constant.ALL_TIMES - 1));
+    };
+    /**
+     * 横座標→艦隊番号
+     */
+    Utility.xToFleetIndex = function (x) {
+        return Math.floor(Utility.Limit((x - Constant.CANVAS_HOUR_MARGIN) / Constant.TASK_WIDTH, 0, Constant.FLEET_COUNT));
+    };
+    return Utility;
+}());
+;
 var MainController = /** @class */ (function () {
     /**
      * コンストラクタ
@@ -182,11 +221,6 @@ var MainController = /** @class */ (function () {
         // canvasを初期化
         this.initializeCanvas();
     }
-    /**
-     * タイミング→縦座標
-     */
-    MainController.timingToHeight = function (timing) {
-    };
     /**
      * 遠征タスクを初期化
      */
@@ -289,6 +323,19 @@ var MainController = /** @class */ (function () {
      * ドラッグ終了時に呼び出される関数
      */
     MainController.prototype.dragendedTask = function (data, index) {
+        var fleetIndex = Utility.xToFleetIndex(data.tx);
+        var timing = Utility.yToTiming(data.ty);
+        data.rx = Utility.fleetIndexToX(fleetIndex);
+        data.ry = Utility.timingToY(timing);
+        data.tx = data.rx;
+        data.ty = data.ry + 18 + 2;
+        console.log('' + fleetIndex + ' ' + timing + ' ' + index);
+        d3.selectAll("g > text").filter(function (d, i) { return (i === index); })
+            .attr("x", data.tx)
+            .attr("y", data.ty);
+        d3.selectAll("g > rect").filter(function (d, i) { return (i === index); })
+            .attr("x", data.rx)
+            .attr("y", data.ry);
     };
     return MainController;
 }());
