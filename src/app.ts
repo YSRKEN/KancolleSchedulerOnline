@@ -271,6 +271,7 @@ class MainController {
     private canvas = d3.select("#canvas").append("svg")
         .attr("width", Constant.CANVAS_WIDTH)
         .attr("height", Constant.CANVAS_HEIGHT);
+    private selectedTaskIndex: number = -1;
     /**
      * 遠征タスクを初期化
      */
@@ -407,7 +408,19 @@ class MainController {
         var distance = distanceX * distanceX + distanceY * distanceY;
         if(distance == 0){
             // クリックの場合の処理
-            console.log("click " + data.expedition.name);
+            if(this.selectedTaskIndex == index){
+                this.selectedTaskIndex = -1;
+                d3.selectAll("g > rect").filter((d, i) => (i === index))
+                    .attr("fill","skyblue");
+            }else{
+                if(this.selectedTaskIndex != -1){
+                    d3.selectAll("g > rect").filter((d, i) => (i === this.selectedTaskIndex))
+                        .attr("fill","skyblue");
+                }
+                this.selectedTaskIndex = index;
+                d3.selectAll("g > rect").filter((d, i) => (i === index))
+                    .attr("fill","orange");
+            }
         }else{
             // 艦隊番号とタイミングを逆算
             var fleetIndex = Utility.xToFleetIndex(data.rx);
