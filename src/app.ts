@@ -409,20 +409,8 @@ class MainController {
         var distanceY = this.dragMouseY - d3.event.y;
         var distance = distanceX * distanceX + distanceY * distanceY;
         if(distance == 0){
-            // クリックの場合の処理
-            if(this.selectedTaskIndex == index){
-                this.selectedTaskIndex = -1;
-                d3.selectAll("g > rect").filter((d, i) => (i === index))
-                    .attr("fill","skyblue");
-            }else{
-                if(this.selectedTaskIndex != -1){
-                    d3.selectAll("g > rect").filter((d, i) => (i === this.selectedTaskIndex))
-                        .attr("fill","skyblue");
-                }
-                this.selectedTaskIndex = index;
-                d3.selectAll("g > rect").filter((d, i) => (i === index))
-                    .attr("fill","orange");
-            }
+            // クリック時の処理
+            this.clickedTask(data, index);
         }else{
             // 艦隊番号とタイミングを逆算
             var fleetIndex = Utility.xToFleetIndex(data.rx);
@@ -485,6 +473,27 @@ class MainController {
             d3.selectAll("g > rect").filter((d, i) => (i === index))
                 .attr("x", data.rx)
                 .attr("y", data.ry);
+        }
+    }
+    /**
+     * 遠征タスクをクリックした際に呼び出される関数
+     * @param data クリックした遠征タスク
+     * @param index 遠征タスクのインデックス
+     */
+    private clickedTask(data: ExpeditionTask, index: number) {
+        // クリックの場合の処理
+        if(this.selectedTaskIndex == index){
+            this.selectedTaskIndex = -1;
+            d3.selectAll("g > rect").filter((d, i) => (i === index))
+                .attr("fill","skyblue");
+        }else{
+            if(this.selectedTaskIndex != -1){
+                d3.selectAll("g > rect").filter((d, i) => (i === this.selectedTaskIndex))
+                    .attr("fill","skyblue");
+            }
+            this.selectedTaskIndex = index;
+            d3.selectAll("g > rect").filter((d, i) => (i === index))
+                .attr("fill","orange");
         }
     }
     /**
