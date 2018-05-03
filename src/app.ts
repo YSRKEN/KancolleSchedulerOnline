@@ -434,6 +434,7 @@ class MainController {
         if(distance <= 100){
             // クリック時の処理
             data.rewindTaskPosition();
+            this.refreshTaskPosition(index);
             this.clickedTask(data, index);
         }else{
             // 艦隊番号とタイミングを逆算
@@ -489,12 +490,7 @@ class MainController {
                 data.rewindTaskPosition();
             }
             // 修正した座標を反映
-            d3.selectAll("g > text").filter((d, i) => (i === index))
-                .attr("x", data.tx)
-                .attr("y", data.ty);
-            d3.selectAll("g > rect").filter((d, i) => (i === index))
-                .attr("x", data.rx)
-                .attr("y", data.ry);
+            this.refreshTaskPosition(index);
         }
     }
     /**
@@ -534,6 +530,15 @@ class MainController {
         this.expTaskList.splice(this.selectedTaskIndex, 1);
         this.selectedTaskIndex = -1;
         this.redrawCanvas();
+    }
+    private refreshTaskPosition(index: number){
+        var data = this.expTaskList[index];
+        d3.selectAll("g > text").filter((d, i) => (i === index))
+            .attr("x", data.tx)
+            .attr("y", data.ty);
+        d3.selectAll("g > rect").filter((d, i) => (i === index))
+            .attr("x", data.rx)
+            .attr("y", data.ry);
     }
     /**
      * コンストラクタ
