@@ -1,8 +1,13 @@
 {
     "compilerOptions": {
+        "module": "commonjs",
         "target": "es5",
-        "sourceMap": true,
-        "removeComments": false,
-        "moduleResolution": "node"
-    }
+        "noImplicitAny": false,
+        "outDir": "public",
+        "rootDir": ".",
+        "sourceMap": true
+    },
+    "exclude": [
+        "node_modules"
+    ]
 }

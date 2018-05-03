@@ -1,14 +1,24 @@
+const path = require('path');
+
 module.exports = {
- 
-    // メインとなるJavaScriptファイル（エントリーポイント）
-    entry: `./src/app.js`,
-   
-    // ファイルの出力設定
+    entry: [
+        './src/app.ts'
+    ],
     output: {
-      //  出力ファイルのディレクトリ名
-      path: `${__dirname}`,
-      // 出力ファイル名
-      filename: 'app.js'
+        path: path.join(__dirname, 'public'),
+        filename: 'bundle.js'
     },
-  };
-  
+    devtool: 'source-map',
+    resolve: {
+        extensions: [".ts", ".tsx", ".js"]
+    },
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/
+            }
+        ]
+    }
+};

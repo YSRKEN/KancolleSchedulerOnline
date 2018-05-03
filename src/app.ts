@@ -336,7 +336,6 @@ class MainController {
             }
             // 入れたい遠征がcandidateと明らかに干渉している場合はアウト
             var mediumTiming = timing + data.expedition.time / 2;   //入れたい遠征の中央の位置
-            console.log('mediumTiming : ' + mediumTiming);
             if(candidate.filter(task => task.timing <= mediumTiming && mediumTiming <= task.endTiming).length > 0){
                 fleetIndex = data.fleetIndex;
                 timing = data.timing;
