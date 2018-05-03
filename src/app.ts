@@ -94,7 +94,29 @@ class ExpeditionTask {
      * 遠征の終了タイミング
      */
     get endTiming(){ return this.timing + this.expedition.time; }
+    /**
+     * 比較用ハッシュ関数
+     */
     get hash(){ return this.timing + this.fleetIndex * Constant.ALL_TIMES; }
+    /**
+     * 遠征タスクの座標を、艦隊番号とタイミングから設定する
+     * @param fleetIndex 艦隊番号
+     * @param timing タイミング
+     */
+    setTaskPosition(fleetIndex, timing){
+        this.rx = Utility.fleetIndexToX(fleetIndex);
+        this.ry = Utility.timingToY(timing);
+        this.tx = this.rx;
+        this.ty = this.ry + 18 + 2;
+        this.fleetIndex = fleetIndex;
+        this.timing = timing;
+    }
+    /**
+     * 遠征タスクの座標をドラッグ前に戻す
+     */
+    rewindTaskPosition(){
+        this.setTaskPosition(this.fleetIndex, this.timing);
+    }
 };
 
 /**
@@ -384,6 +406,7 @@ class MainController {
         // 開始時のマウス座標を記録する
         this.dragMouseX = d3.event.x;
         this.dragMouseY = d3.event.y;
+        d3.event.preventDefault;
     }
     /**
      * ドラッグ中に呼び出される関数
@@ -408,8 +431,9 @@ class MainController {
         var distanceX = this.dragMouseX - d3.event.x;
         var distanceY = this.dragMouseY - d3.event.y;
         var distance = distanceX * distanceX + distanceY * distanceY;
-        if(distance == 0){
+        if(distance <= 100){
             // クリック時の処理
+            data.rewindTaskPosition();
             this.clickedTask(data, index);
         }else{
             // 艦隊番号とタイミングを逆算
@@ -418,6 +442,7 @@ class MainController {
             // 当該艦隊番号における他の遠征一覧を出す
             var candidate = this.expTaskList.filter(task => task.fleetIndex == fleetIndex && task.hash != data.hash);
             // 各種判定処理を行う
+            var dragFlg = true;
             while(true){
                 // candidateの大きさが0ならば、他の遠征と何ら干渉しないのでセーフ
                 if(candidate.length == 0){
@@ -426,8 +451,7 @@ class MainController {
                 // 入れたい遠征がcandidateと明らかに干渉している場合はアウト
                 var mediumTiming = timing + data.expedition.time / 2;   //入れたい遠征の中央の位置
                 if(candidate.filter(task => task.timing <= mediumTiming && mediumTiming <= task.endTiming).length > 0){
-                    fleetIndex = data.fleetIndex;
-                    timing = data.timing;
+                    dragFlg = false;
                     break;
                 }
                 // mediumTimingがcandidateのどの候補の中にも重ならなかった場合、prevTimingとnextTimingの計算を行う
@@ -437,8 +461,7 @@ class MainController {
                 var nextTiming = (candidate.some(task => mediumTiming <= task.timing) ? candidate.filter(task => mediumTiming <= task.timing).sort((a, b) => a.endTiming - b.endTiming)[0].timing : Constant.ALL_TIMES);
                 // nextTiming - prevTimingが入れたい遠征の幅より狭い場合、入りっこないのでアウト
                 if(nextTiming - prevTiming < data.expedition.time){
-                    fleetIndex = data.fleetIndex;
-                    timing = data.timing;
+                    dragFlg = false;
                     break;
                 }
                 // そのまま入る場合は文句なくセーフ
@@ -460,12 +483,11 @@ class MainController {
                 }
             }
             // 逆算した結果を元に座標修正を掛ける
-            data.rx = Utility.fleetIndexToX(fleetIndex);
-            data.ry = Utility.timingToY(timing);
-            data.tx = data.rx;
-            data.ty = data.ry + 18 + 2;
-            data.fleetIndex = fleetIndex;
-            data.timing = timing;
+            if(dragFlg){
+                data.setTaskPosition(fleetIndex, timing);
+            }else{
+                data.rewindTaskPosition();
+            }
             // 修正した座標を反映
             d3.selectAll("g > text").filter((d, i) => (i === index))
                 .attr("x", data.tx)
@@ -481,20 +503,27 @@ class MainController {
      * @param index 遠征タスクのインデックス
      */
     private clickedTask(data: ExpeditionTask, index: number) {
-        // クリックの場合の処理
+        // 遠征タスクを選択したことによる着色処理
         if(this.selectedTaskIndex == index){
+            // 既に選択していた遠征タスクをクリックした場合
             this.selectedTaskIndex = -1;
             d3.selectAll("g > rect").filter((d, i) => (i === index))
                 .attr("fill","skyblue");
         }else{
+            // まだ選択していない遠征タスクをクリックした場合
             if(this.selectedTaskIndex != -1){
+                // 既に選択していた遠征タスクの選択を取り消す
                 d3.selectAll("g > rect").filter((d, i) => (i === this.selectedTaskIndex))
                     .attr("fill","skyblue");
             }
+            // 改めて選択する処理
             this.selectedTaskIndex = index;
             d3.selectAll("g > rect").filter((d, i) => (i === index))
                 .attr("fill","orange");
         }
+        // 選択した遠征タスクの情報を画面に反映する処理
+        d3.select("#areaName").attr("value", this.expTaskList[index].expedition.areaName);
+        d3.select("#expName").attr("value", this.expTaskList[index].expedition.name);
     }
     /**
      * 削除ボタンを押した際に呼び出される関数
