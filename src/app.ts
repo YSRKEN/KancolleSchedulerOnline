@@ -157,6 +157,17 @@ class DataStore {
         var expedition = DataStore.expeditionList.filter(e => e.name == name)[0];
         return new ExpeditionTask(expedition, timing, fleetIndex);
     }
+    /**
+     * 海域名の一覧を返す
+     * 参考：
+     * https://qiita.com/cocottejs/items/7afe6d5f27ee7c36c61f
+     */
+    static get makeAreaNameList(){
+        return this.expeditionList.map(e => e.areaName).filter((x, i, self) => self.indexOf(x) === i);
+    }
+    static gerNameList(areaName: string){
+        return this.expeditionList.filter(e => e.areaName == areaName).map(e => e.name);
+    }
 };
 
 /**
@@ -285,6 +296,30 @@ class MainController {
                 .attr("font-size", "18px")
                 .text(hourString);
         }
+    }
+    /**
+     * 遠征海域一覧を初期化
+     */
+    private initializeAreaNameList(){
+        var areaNameList = DataStore.makeAreaNameList;
+        areaNameList.unshift("---");
+        d3.select("#areaName").on("change", this.initializeExpNameList)
+            .selectAll("option").data(areaNameList).enter()
+            .append("option").attr("value", d => d).text(d => d);
+    }
+    /**
+     * 遠征海域における遠征一覧を初期化
+     * @param areaName 遠征海域
+     */
+    private initializeExpNameList(){
+        var areaName = d3.select("#areaName").property('value');
+        var nameList = DataStore.gerNameList(areaName);
+        nameList.unshift("---");
+        d3.select("#expName")
+            .selectAll("option").remove();
+        d3.select("#expName").selectAll("option")
+            .data(nameList).enter()
+            .append("option").attr("value", d2 => d2).text(d2 => d2);
     }
     /**
      * 遠征スケジュールを再描画する
@@ -422,6 +457,8 @@ class MainController {
      * コンストラクタ
      */
     constructor(){
+        // セレクトボックスを初期化
+        this.initializeAreaNameList();
         // expTaskListを初期化
         this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",95,0));
         this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",95,1));
@@ -446,7 +483,6 @@ class MainController {
  * スタートアップ
  */
 window.onload = () => {
-    var element = document.getElementById("taskList");
     // データベースを初期化
     DataStore.initialize();
     // Controllerを初期化
