@@ -324,15 +324,14 @@ class MainController {
      */
     private dragendedTask(data: ExpeditionTask, index: number, expTaskList: Array<ExpeditionTask>) {
         // 艦隊番号とタイミングを逆算
-        var fleetIndex = Utility.xToFleetIndex(data.tx);
-        var timing = Utility.yToTiming(data.ty);
+        var fleetIndex = Utility.xToFleetIndex(data.rx);
+        var timing = Utility.yToTiming(data.ry);
         // 当該艦隊番号における他の遠征一覧を出す
         var candidate = expTaskList.filter(task => task.fleetIndex == fleetIndex && task.hash != data.hash);
         // 各種判定処理を行う
         while(true){
             // candidateの大きさが0ならば、他の遠征と何ら干渉しないのでセーフ
             if(candidate.length == 0){
-                console.log('OK1');
                 break;
             }
             // 入れたい遠征がcandidateと明らかに干渉している場合はアウト
@@ -341,7 +340,6 @@ class MainController {
             if(candidate.filter(task => task.timing <= mediumTiming && mediumTiming <= task.endTiming).length > 0){
                 fleetIndex = data.fleetIndex;
                 timing = data.timing;
-                console.log('NG1');
                 break;
             }
             // mediumTimingがcandidateのどの候補の中にも重ならなかった場合、prevTimingとnextTimingの計算を行う
@@ -353,13 +351,11 @@ class MainController {
             if(nextTiming - prevTiming < data.expedition.time){
                 fleetIndex = data.fleetIndex;
                 timing = data.timing;
-                console.log('NG2');
                 break;
             }
             // そのまま入る場合は文句なくセーフ
             var endTiming = timing + data.expedition.time;
             if(prevTiming <= timing && endTiming <= nextTiming){
-                console.log('OK2');
                 break;
             }
             // 位置補正を掛ける
@@ -368,12 +364,10 @@ class MainController {
             if(moveDistance1 < moveDistance2){
                 // 下方向に動かす
                 timing = prevTiming;
-                console.log('FIX1');
                 break;
             }else{
                 // 上方向に動かす
                 timing = nextTiming - data.expedition.time;
-                console.log('FIX2');
                 break;
             }
         }
@@ -381,8 +375,7 @@ class MainController {
         data.rx = Utility.fleetIndexToX(fleetIndex);
         data.ry = Utility.timingToY(timing);
         data.tx = data.rx;
-        data.ty = data.ry + 18 + 2; 
-        console.log('' + fleetIndex + ' ' + timing + ' ' + index + '|' + data.fleetIndex + ' ' + data.timing);
+        data.ty = data.ry + 18 + 2;
         data.fleetIndex = fleetIndex;
         data.timing = timing;
         // 修正した座標を反映
