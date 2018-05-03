@@ -268,7 +268,6 @@ var MainController = /** @class */ (function () {
      * 遠征スケジュールを再描画する
      */
     MainController.prototype.redrawCanvas = function () {
-        var _this = this;
         // 遠征タスクをまとめて消去
         this.canvas.selectAll("g").remove();
         // 遠征タスクをまとめて描画するための下地
@@ -279,7 +278,7 @@ var MainController = /** @class */ (function () {
             .call(d3.drag()
             .on("start", this.dragstartedTask)
             .on("drag", this.draggedTask)
-            .on("end", function (d, i) { return _this.dragendedTask(d, i, _this.expTaskList); }));
+            .on("end", this.dragendedTask.bind(this)));
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
         tasks.append("rect")
@@ -332,12 +331,12 @@ var MainController = /** @class */ (function () {
     /**
      * ドラッグ終了時に呼び出される関数
      */
-    MainController.prototype.dragendedTask = function (data, index, expTaskList) {
+    MainController.prototype.dragendedTask = function (data, index) {
         // 艦隊番号とタイミングを逆算
         var fleetIndex = Utility.xToFleetIndex(data.rx);
         var timing = Utility.yToTiming(data.ry);
         // 当該艦隊番号における他の遠征一覧を出す
-        var candidate = expTaskList.filter(function (task) { return task.fleetIndex == fleetIndex && task.hash != data.hash; });
+        var candidate = this.expTaskList.filter(function (task) { return task.fleetIndex == fleetIndex && task.hash != data.hash; });
         // 各種判定処理を行う
         while (true) {
             // candidateの大きさが0ならば、他の遠征と何ら干渉しないのでセーフ

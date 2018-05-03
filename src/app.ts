@@ -268,7 +268,7 @@ class MainController {
                 d3.drag<SVGElement, ExpeditionTask>()
                     .on("start", this.dragstartedTask)
                     .on("drag", this.draggedTask)
-                    .on("end", (d, i) => this.dragendedTask(d, i, this.expTaskList))
+                    .on("end", this.dragendedTask.bind(this))
             );
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
@@ -322,12 +322,12 @@ class MainController {
     /**
      * ドラッグ終了時に呼び出される関数
      */
-    private dragendedTask(data: ExpeditionTask, index: number, expTaskList: Array<ExpeditionTask>) {
+    private dragendedTask(data: ExpeditionTask, index: number) {
         // 艦隊番号とタイミングを逆算
         var fleetIndex = Utility.xToFleetIndex(data.rx);
         var timing = Utility.yToTiming(data.ry);
         // 当該艦隊番号における他の遠征一覧を出す
-        var candidate = expTaskList.filter(task => task.fleetIndex == fleetIndex && task.hash != data.hash);
+        var candidate = this.expTaskList.filter(task => task.fleetIndex == fleetIndex && task.hash != data.hash);
         // 各種判定処理を行う
         while(true){
             // candidateの大きさが0ならば、他の遠征と何ら干渉しないのでセーフ

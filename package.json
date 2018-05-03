@@ -8,6 +8,7 @@
     "typescript": "^2.8.3"
   },
   "devDependencies": {
+    "typings": "^2.1.1",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.15"
   },
