@@ -111,12 +111,41 @@ class DataStore {
      */
     static initialize() {
         DataStore.expeditionList = new Array<Expedition>();
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "練習航海", 15, 1, 1));
         DataStore.expeditionList.push(new Expedition("鎮守府海域", "長距離練習航海", 30, 1, 4));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "警備任務", 20, 2, 2));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "対潜警戒任務", 50, 1, 4));
         DataStore.expeditionList.push(new Expedition("鎮守府海域", "海上護衛任務", 90, 0, 1));
         DataStore.expeditionList.push(new Expedition("鎮守府海域", "防空射撃演習", 40, 3, 3));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "観艦式予行", 60, 2, 3));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "観艦式", 180, 1, 1));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "兵站強化任務", 25, 0, 1));
+        DataStore.expeditionList.push(new Expedition("鎮守府海域", "海峡警備行動", 55, 0, 1));
         DataStore.expeditionList.push(new Expedition("鎮守府海域", "長時間対潜警戒", 135, 0, 4));
-        DataStore.expeditionList.push(new Expedition("鎮守府海域", "強行偵察任務", 90, 1, 4));
-        DataStore.expeditionList.push(new Expedition("鎮守府海域", "鼠輸送作戦", 240, 0, 1));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "タンカー護衛任務", 240, 0, 0));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "強行偵察任務", 90, 1, 4));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "ボーキサイト輸送任務", 300, 3, 3));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "資源輸送任務", 480, 1, 2));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "鼠輸送作戦", 240, 0, 1));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "包囲陸戦隊撤収作戦", 360, 1, 2));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "囮機動部隊支援作戦", 720, 2, 3));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "艦隊決戦援護作戦", 900, 0, 1));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "南西方面航空偵察作戦", 35, 2, 3));
+        DataStore.expeditionList.push(new Expedition("南西諸島海域", "敵泊地強襲反撃作戦", 520, 0, 1));
+        DataStore.expeditionList.push(new Expedition("北方海域", "敵地偵察作戦", 45, 0, 1));
+        DataStore.expeditionList.push(new Expedition("北方海域", "航空機輸送作戦", 300, 2, 4));
+        DataStore.expeditionList.push(new Expedition("北方海域", "北号作戦", 360, 0, 0));
+        DataStore.expeditionList.push(new Expedition("北方海域", "潜水艦哨戒任務", 120, 2, 2));
+        DataStore.expeditionList.push(new Expedition("北方海域", "北方鼠輸送作戦", 140, 0, 1));
+        DataStore.expeditionList.push(new Expedition("北方海域", "北方航路海上護衛", 500, 0, 0));
+        DataStore.expeditionList.push(new Expedition("西方海域", "潜水艦通商破壊作戦", 1200, 2, 2));
+        DataStore.expeditionList.push(new Expedition("西方海域", "潜水艦派遣演習", 1440, 3, 3));
+        DataStore.expeditionList.push(new Expedition("西方海域", "海外艦との接触", 120, 1, 1));
+        DataStore.expeditionList.push(new Expedition("南方海域", "MO作戦", 420, 2, 3));
+        DataStore.expeditionList.push(new Expedition("南方海域", "水上機基地建設", 540, 0, 0));
+        DataStore.expeditionList.push(new Expedition("南方海域", "東京急行", 165, 1, 2));
+        DataStore.expeditionList.push(new Expedition("南方海域", "東京急行（弐）", 175, 0, 2));
+        DataStore.expeditionList.push(new Expedition("南方海域", "水上機前線輸送", 410, 0, 1));
     }
     /**
      * 遠征名・タイミング・艦隊番号から遠征タスクを作成
@@ -153,15 +182,19 @@ class Constant{
     /**
      * 時間を表示するための余白
      */
-    static CANVAS_HOUR_MARGIN: number = 50;
+    static CANVAS_HOUR_MARGIN: number = 40;
     /**
      * 上下方向の余白
      */
     static CANVAS_HEIGHT_MARGIN: number = 20;
     /**
+     * 左右方向の余白
+     */
+    static CANVAS_WIDTH_MARGIN: number = 20;
+    /**
      * スケジュール表示の横幅
      */
-    static CANVAS_WIDTH: number = Constant.TASK_WIDTH * Constant.FLEET_COUNT + Constant.CANVAS_HOUR_MARGIN;
+    static CANVAS_WIDTH: number = Constant.TASK_WIDTH * Constant.FLEET_COUNT + Constant.CANVAS_HOUR_MARGIN + Constant.CANVAS_WIDTH_MARGIN * 2;
     /**
      * スケジュール表示の縦幅
      */
@@ -191,7 +224,7 @@ class Utility{
      * 艦隊番号→横座標
      */
     static fleetIndexToX(fleetIndex: number){
-        return Constant.TASK_WIDTH * fleetIndex + Constant.CANVAS_HOUR_MARGIN;
+        return Constant.TASK_WIDTH * fleetIndex + Constant.CANVAS_HOUR_MARGIN + Constant.CANVAS_WIDTH_MARGIN;
     }
     /**
      * 縦座標→タイミング
@@ -203,7 +236,7 @@ class Utility{
      * 横座標→艦隊番号
      */
     static xToFleetIndex(x: number){
-        return Math.floor(Utility.Limit((x + Constant.TASK_WIDTH / 2 - Constant.CANVAS_HOUR_MARGIN) / Constant.TASK_WIDTH, 0, Constant.FLEET_COUNT - 1));
+        return Math.floor(Utility.Limit((x + Constant.TASK_WIDTH / 2 - Constant.CANVAS_HOUR_MARGIN - Constant.CANVAS_WIDTH_MARGIN) / Constant.TASK_WIDTH, 0, Constant.FLEET_COUNT - 1));
     }
 };
 
@@ -241,13 +274,13 @@ class MainController {
                 .attr("y1", Utility.timingToY(60 * h))
                 .attr("y2", Utility.timingToY(60 * h))
                 .attr("x1", Utility.fleetIndexToX(0))
-                .attr("x2", Utility.fleetIndexToX(Constant.FLEET_COUNT + 1))
+                .attr("x2", Utility.fleetIndexToX(Constant.FLEET_COUNT))
                 .attr("stroke-width", 1)
                 .attr("stroke", "black");
             var hour = (h + 5) % 24;
             var hourString = hour.toString() + ":00";
             this.canvas.append("text")
-                .attr("x", Constant.CANVAS_HOUR_MARGIN - hourString.length * 18 / 2)
+                .attr("x", Constant.CANVAS_HOUR_MARGIN + Constant.CANVAS_WIDTH_MARGIN - hourString.length * 18 / 2)
                 .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + 9 + Constant.CANVAS_HEIGHT_MARGIN)
                 .attr("font-size", "18px")
                 .text(hourString);

@@ -20,5 +20,6 @@ module.exports = {
                 exclude: /node_modules/
             }
         ]
-    }
+    },
+    performance: { hints: false }
 };

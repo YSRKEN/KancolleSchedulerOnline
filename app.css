@@ -5,3 +5,17 @@
 span {
     font-style: italic;
 }
+
+table.task_operation{
+    border: 1px #000000 solid;
+    border-collapse: collapse;
+}
+
+table.task_operation tr{
+    border: 1px #000000 solid;
+}
+
+table.task_operation td{
+    padding:5px;
+    border: 1px #000000 solid;
+}
