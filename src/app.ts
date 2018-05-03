@@ -269,33 +269,40 @@ class MainController {
     private initializeCanvas(){
         // 縦方向の罫線
         // (太さ1の黒い実線)
-        for(var w = 0; w <= Constant.FLEET_COUNT; ++w){
-            this.canvas.append("line")
-                .attr("x1", Utility.fleetIndexToX(w))
-                .attr("x2", Utility.fleetIndexToX(w))
-                .attr("y1", Utility.timingToY(0))
-                .attr("y2", Utility.timingToY(Constant.ALL_TIMES))
-                .attr("stroke-width", 1)
-                .attr("stroke", "black");
-        }
+        this.canvas.selectAll("line.cl").classed("cl", true)
+            .data(d3.range(Constant.FLEET_COUNT + 1))
+            .enter()
+            .append("line")
+            .attr("x1", w => Utility.fleetIndexToX(w))
+            .attr("x2", w => Utility.fleetIndexToX(w))
+            .attr("y1", Utility.timingToY(0))
+            .attr("y2", Utility.timingToY(Constant.ALL_TIMES))
+            .attr("stroke-width", 1)
+            .attr("stroke", "black");
         // 横方向の罫線と時刻表示
         // (太さ1の黒い実線、文字は18pxで遠征スケジュールの左側に表示)
-        for(var h = 0; h <= 24; ++h){
-            this.canvas.append("line")
-                .attr("y1", Utility.timingToY(60 * h))
-                .attr("y2", Utility.timingToY(60 * h))
-                .attr("x1", Utility.fleetIndexToX(0))
-                .attr("x2", Utility.fleetIndexToX(Constant.FLEET_COUNT))
-                .attr("stroke-width", 1)
-                .attr("stroke", "black");
+        this.canvas.selectAll("line.rl").classed("rl", true)
+            .data(d3.range(24 + 1))
+            .enter()
+            .append("line")
+            .attr("y1", h => Utility.timingToY(60 * h))
+            .attr("y2", h => Utility.timingToY(60 * h))
+            .attr("x1", Utility.fleetIndexToX(0))
+            .attr("x2", Utility.fleetIndexToX(Constant.FLEET_COUNT))
+            .attr("stroke-width", 1)
+            .attr("stroke", "black");
+        var hourStringList = d3.range(24 + 1).map(h => {
             var hour = (h + 5) % 24;
-            var hourString = hour.toString() + ":00";
-            this.canvas.append("text")
-                .attr("x", Constant.CANVAS_HOUR_MARGIN + Constant.CANVAS_WIDTH_MARGIN - hourString.length * 18 / 2)
-                .attr("y", Constant.TASK_HEIGHT_PER_TIME * 60 * h + 9 + Constant.CANVAS_HEIGHT_MARGIN)
+            return hour.toString() + ":00";
+        });
+        this.canvas.selectAll("text")
+            .data(d3.range(24 + 1))
+            .enter()
+            .append("text")
+                .attr("x", h => Utility.fleetIndexToX(0) - hourStringList[h].length * 18 / 2)
+                .attr("y", h => Utility.timingToY(60 * h) + 9)
                 .attr("font-size", "18px")
-                .text(hourString);
-        }
+                .text((h) => hourStringList[h]);
     }
     /**
      * 遠征海域一覧を初期化
@@ -341,7 +348,6 @@ class MainController {
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
         tasks.append("rect")
-            .classed("movable", true)
             .attr("x", function(task) { return task.rx; })
             .attr("y", function(task) { return task.ry; })
             .attr("width",Constant.TASK_WIDTH)
@@ -353,19 +359,12 @@ class MainController {
             .attr("fill","skyblue");
         // (文字は18pxで、遠征タスク枠の左上に横向きで描画)
         tasks.append("text")
-            .classed("movable", true)
             .attr("x", function(task) { return task.tx; })
             .attr("y", function(task) { return task.ty; })
             .attr("font-size", "18px")
             .text(function(task){
                 return task.expedition.name;
             });
-    }
-    test(){
-        this.expTaskList.length = 0;
-        this.expTaskList.push(DataStore.makeExpeditionTask("海上護衛任務",0,2));
-        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",100,1));
-        this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",200,0));
     }
     /**
      * ドラッグスタート時に呼び出される関数
@@ -488,7 +487,5 @@ window.onload = () => {
     // Controllerを初期化
     var mc = new MainController();
     // 画面を再描画
-    mc.redrawCanvas();
-    mc.test();
     mc.redrawCanvas();
 };
