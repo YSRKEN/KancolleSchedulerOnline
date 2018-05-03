@@ -253,6 +253,14 @@ class Utility{
 
 class MainController {
     /**
+     * ドラッグ開始時のマウスのX座標
+     */
+    private dragMouseX: number;
+    /**
+     * ドラッグ開始時のマウスのY座標
+     */
+    private dragMouseY: number;
+    /**
      * 遠征タスクの一覧
      */
     private expTaskList: Array<ExpeditionTask> = new Array<ExpeditionTask>();
@@ -341,7 +349,7 @@ class MainController {
             .append("g")
             .call(
                 d3.drag<SVGElement, ExpeditionTask>()
-                    .on("start", this.dragstartedTask)
+                    .on("start", this.dragstartedTask.bind(this))
                     .on("drag", this.draggedTask)
                     .on("end", this.dragendedTask.bind(this))
             );
@@ -369,7 +377,10 @@ class MainController {
     /**
      * ドラッグスタート時に呼び出される関数
      */
-     private dragstartedTask() {
+    private dragstartedTask() {
+        // 開始時のマウス座標を記録する
+        this.dragMouseX = d3.event.x;
+        this.dragMouseY = d3.event.y;
     }
     /**
      * ドラッグ中に呼び出される関数
@@ -390,67 +401,76 @@ class MainController {
      * ドラッグ終了時に呼び出される関数
      */
     private dragendedTask(data: ExpeditionTask, index: number) {
-        // 艦隊番号とタイミングを逆算
-        var fleetIndex = Utility.xToFleetIndex(data.rx);
-        var timing = Utility.yToTiming(data.ry);
-        // 当該艦隊番号における他の遠征一覧を出す
-        var candidate = this.expTaskList.filter(task => task.fleetIndex == fleetIndex && task.hash != data.hash);
-        // 各種判定処理を行う
-        while(true){
-            // candidateの大きさが0ならば、他の遠征と何ら干渉しないのでセーフ
-            if(candidate.length == 0){
-                break;
+        // マウスの移動量によって、クリックかドラッグかを判定する
+        var distanceX = this.dragMouseX - d3.event.x;
+        var distanceY = this.dragMouseY - d3.event.y;
+        var distance = distanceX * distanceX + distanceY * distanceY;
+        if(distance == 0){
+            // クリックの場合の処理
+            console.log("click " + data.expedition.name);
+        }else{
+            // 艦隊番号とタイミングを逆算
+            var fleetIndex = Utility.xToFleetIndex(data.rx);
+            var timing = Utility.yToTiming(data.ry);
+            // 当該艦隊番号における他の遠征一覧を出す
+            var candidate = this.expTaskList.filter(task => task.fleetIndex == fleetIndex && task.hash != data.hash);
+            // 各種判定処理を行う
+            while(true){
+                // candidateの大きさが0ならば、他の遠征と何ら干渉しないのでセーフ
+                if(candidate.length == 0){
+                    break;
+                }
+                // 入れたい遠征がcandidateと明らかに干渉している場合はアウト
+                var mediumTiming = timing + data.expedition.time / 2;   //入れたい遠征の中央の位置
+                if(candidate.filter(task => task.timing <= mediumTiming && mediumTiming <= task.endTiming).length > 0){
+                    fleetIndex = data.fleetIndex;
+                    timing = data.timing;
+                    break;
+                }
+                // mediumTimingがcandidateのどの候補の中にも重ならなかった場合、prevTimingとnextTimingの計算を行う
+                // prevTiming……遠征を入れたい位置の手前にある遠征の終了タイミング
+                // nextTiming……遠征を入れたい位置の後にある遠征の開始タイミング
+                var prevTiming = (candidate.some(task => task.endTiming <= mediumTiming) ? candidate.filter(task => task.endTiming <= mediumTiming).sort((a, b) => b.endTiming - a.endTiming)[0].endTiming : 0);
+                var nextTiming = (candidate.some(task => mediumTiming <= task.timing) ? candidate.filter(task => mediumTiming <= task.timing).sort((a, b) => a.endTiming - b.endTiming)[0].timing : Constant.ALL_TIMES);
+                // nextTiming - prevTimingが入れたい遠征の幅より狭い場合、入りっこないのでアウト
+                if(nextTiming - prevTiming < data.expedition.time){
+                    fleetIndex = data.fleetIndex;
+                    timing = data.timing;
+                    break;
+                }
+                // そのまま入る場合は文句なくセーフ
+                var endTiming = timing + data.expedition.time;
+                if(prevTiming <= timing && endTiming <= nextTiming){
+                    break;
+                }
+                // 位置補正を掛ける
+                var moveDistance1 = (prevTiming <= timing ? Constant.ALL_TIMES :  prevTiming - timing);    //上端が重ならないようにするための最小の下方向への移動量
+                var moveDistance2 = (endTiming <= nextTiming ? Constant.ALL_TIMES : endTiming - nextTiming); //下端が～上方向～
+                if(moveDistance1 < moveDistance2){
+                    // 下方向に動かす
+                    timing = prevTiming;
+                    break;
+                }else{
+                    // 上方向に動かす
+                    timing = nextTiming - data.expedition.time;
+                    break;
+                }
             }
-            // 入れたい遠征がcandidateと明らかに干渉している場合はアウト
-            var mediumTiming = timing + data.expedition.time / 2;   //入れたい遠征の中央の位置
-            if(candidate.filter(task => task.timing <= mediumTiming && mediumTiming <= task.endTiming).length > 0){
-                fleetIndex = data.fleetIndex;
-                timing = data.timing;
-                break;
-            }
-            // mediumTimingがcandidateのどの候補の中にも重ならなかった場合、prevTimingとnextTimingの計算を行う
-            // prevTiming……遠征を入れたい位置の手前にある遠征の終了タイミング
-            // nextTiming……遠征を入れたい位置の後にある遠征の開始タイミング
-            var prevTiming = (candidate.some(task => task.endTiming <= mediumTiming) ? candidate.filter(task => task.endTiming <= mediumTiming).sort((a, b) => b.endTiming - a.endTiming)[0].endTiming : 0);
-            var nextTiming = (candidate.some(task => mediumTiming <= task.timing) ? candidate.filter(task => mediumTiming <= task.timing).sort((a, b) => a.endTiming - b.endTiming)[0].timing : Constant.ALL_TIMES);
-            // nextTiming - prevTimingが入れたい遠征の幅より狭い場合、入りっこないのでアウト
-            if(nextTiming - prevTiming < data.expedition.time){
-                fleetIndex = data.fleetIndex;
-                timing = data.timing;
-                break;
-            }
-            // そのまま入る場合は文句なくセーフ
-            var endTiming = timing + data.expedition.time;
-            if(prevTiming <= timing && endTiming <= nextTiming){
-                break;
-            }
-            // 位置補正を掛ける
-            var moveDistance1 = (prevTiming <= timing ? Constant.ALL_TIMES :  prevTiming - timing);    //上端が重ならないようにするための最小の下方向への移動量
-            var moveDistance2 = (endTiming <= nextTiming ? Constant.ALL_TIMES : endTiming - nextTiming); //下端が～上方向～
-            if(moveDistance1 < moveDistance2){
-                // 下方向に動かす
-                timing = prevTiming;
-                break;
-            }else{
-                // 上方向に動かす
-                timing = nextTiming - data.expedition.time;
-                break;
-            }
+            // 逆算した結果を元に座標修正を掛ける
+            data.rx = Utility.fleetIndexToX(fleetIndex);
+            data.ry = Utility.timingToY(timing);
+            data.tx = data.rx;
+            data.ty = data.ry + 18 + 2;
+            data.fleetIndex = fleetIndex;
+            data.timing = timing;
+            // 修正した座標を反映
+            d3.selectAll("g > text").filter((d, i) => (i === index))
+                .attr("x", data.tx)
+                .attr("y", data.ty);
+            d3.selectAll("g > rect").filter((d, i) => (i === index))
+                .attr("x", data.rx)
+                .attr("y", data.ry);
         }
-        // 逆算した結果を元に座標修正を掛ける
-        data.rx = Utility.fleetIndexToX(fleetIndex);
-        data.ry = Utility.timingToY(timing);
-        data.tx = data.rx;
-        data.ty = data.ry + 18 + 2;
-        data.fleetIndex = fleetIndex;
-        data.timing = timing;
-        // 修正した座標を反映
-        d3.selectAll("g > text").filter((d, i) => (i === index))
-            .attr("x", data.tx)
-            .attr("y", data.ty);
-        d3.selectAll("g > rect").filter((d, i) => (i === index))
-            .attr("x", data.rx)
-            .attr("y", data.ry);
     }
     /**
      * コンストラクタ
@@ -458,6 +478,7 @@ class MainController {
     constructor(){
         // セレクトボックスを初期化
         this.initializeAreaNameList();
+        this.initializeExpNameList();
         // expTaskListを初期化
         this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",95,0));
         this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",95,1));
