@@ -54,8 +54,8 @@ var ExpeditionTask = /** @class */ (function () {
      */
     function ExpeditionTask(expedition, timing, fleetIndex) {
         this._expedition = expedition;
-        this._timing = timing;
-        this._fleetIndex = fleetIndex;
+        this.timing = timing;
+        this.fleetIndex = fleetIndex;
         this.rx = Utility.fleetIndexToX(fleetIndex);
         this.ry = Utility.timingToY(timing);
         this.tx = this.rx;
@@ -66,13 +66,16 @@ var ExpeditionTask = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(ExpeditionTask.prototype, "timing", {
-        get: function () { return this._timing; },
+    Object.defineProperty(ExpeditionTask.prototype, "endTiming", {
+        /**
+         * 遠征の終了タイミング
+         */
+        get: function () { return this.timing + this.expedition.time; },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(ExpeditionTask.prototype, "fleetIndex", {
-        get: function () { return this._fleetIndex; },
+    Object.defineProperty(ExpeditionTask.prototype, "hash", {
+        get: function () { return this.timing + this.fleetIndex * Constant.ALL_TIMES; },
         enumerable: true,
         configurable: true
     });
@@ -110,6 +113,9 @@ var DataStore = /** @class */ (function () {
     return DataStore;
 }());
 ;
+/**
+ * 各種定数定義
+ */
 var Constant = /** @class */ (function () {
     function Constant() {
     }
@@ -148,6 +154,9 @@ var Constant = /** @class */ (function () {
     return Constant;
 }());
 ;
+/**
+ * ユーティリティ関数
+ */
 var Utility = /** @class */ (function () {
     function Utility() {
     }
@@ -259,6 +268,7 @@ var MainController = /** @class */ (function () {
      * 遠征スケジュールを再描画する
      */
     MainController.prototype.redrawCanvas = function () {
+        var _this = this;
         // 遠征タスクをまとめて消去
         this.canvas.selectAll("g").remove();
         // 遠征タスクをまとめて描画するための下地
@@ -269,7 +279,7 @@ var MainController = /** @class */ (function () {
             .call(d3.drag()
             .on("start", this.dragstartedTask)
             .on("drag", this.draggedTask)
-            .on("end", this.dragendedTask));
+            .on("end", function (d, i) { return _this.dragendedTask(d, i, _this.expTaskList); }));
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
         tasks.append("rect")
@@ -308,28 +318,85 @@ var MainController = /** @class */ (function () {
      * ドラッグ中に呼び出される関数
      */
     MainController.prototype.draggedTask = function (data, index) {
-        data.tx += d3.event.dx;
-        data.ty += d3.event.dy;
         data.rx += d3.event.dx;
         data.ry += d3.event.dy;
-        d3.selectAll("g > text").filter(function (d, i) { return (i === index); })
-            .attr("x", data.tx)
-            .attr("y", data.ty);
+        data.tx += d3.event.dx;
+        data.ty += d3.event.dy;
         d3.selectAll("g > rect").filter(function (d, i) { return (i === index); })
             .attr("x", data.rx)
             .attr("y", data.ry);
+        d3.selectAll("g > text").filter(function (d, i) { return (i === index); })
+            .attr("x", data.tx)
+            .attr("y", data.ty);
     };
     /**
      * ドラッグ終了時に呼び出される関数
      */
-    MainController.prototype.dragendedTask = function (data, index) {
+    MainController.prototype.dragendedTask = function (data, index, expTaskList) {
+        // 艦隊番号とタイミングを逆算
         var fleetIndex = Utility.xToFleetIndex(data.tx);
         var timing = Utility.yToTiming(data.ty);
+        // 当該艦隊番号における他の遠征一覧を出す
+        var candidate = expTaskList.filter(function (task) { return task.fleetIndex == fleetIndex && task.hash != data.hash; });
+        // 各種判定処理を行う
+        while (true) {
+            // candidateの大きさが0ならば、他の遠征と何ら干渉しないのでセーフ
+            if (candidate.length == 0) {
+                console.log('OK1');
+                break;
+            }
+            // 入れたい遠征がcandidateと明らかに干渉している場合はアウト
+            var mediumTiming = timing + data.expedition.time / 2; //入れたい遠征の中央の位置
+            console.log('mediumTiming : ' + mediumTiming);
+            if (candidate.filter(function (task) { return task.timing <= mediumTiming && mediumTiming <= task.endTiming; }).length > 0) {
+                fleetIndex = data.fleetIndex;
+                timing = data.timing;
+                console.log('NG1');
+                break;
+            }
+            // mediumTimingがcandidateのどの候補の中にも重ならなかった場合、prevTimingとnextTimingの計算を行う
+            // prevTiming……遠征を入れたい位置の手前にある遠征の終了タイミング
+            // nextTiming……遠征を入れたい位置の後にある遠征の開始タイミング
+            var prevTiming = (candidate.some(function (task) { return task.endTiming <= mediumTiming; }) ? candidate.filter(function (task) { return task.endTiming <= mediumTiming; }).sort(function (a, b) { return b.endTiming - a.endTiming; })[0].endTiming : 0);
+            var nextTiming = (candidate.some(function (task) { return mediumTiming <= task.timing; }) ? candidate.filter(function (task) { return mediumTiming <= task.timing; }).sort(function (a, b) { return a.endTiming - b.endTiming; })[0].timing : Constant.ALL_TIMES);
+            // nextTiming - prevTimingが入れたい遠征の幅より狭い場合、入りっこないのでアウト
+            if (nextTiming - prevTiming < data.expedition.time) {
+                fleetIndex = data.fleetIndex;
+                timing = data.timing;
+                console.log('NG2');
+                break;
+            }
+            // そのまま入る場合は文句なくセーフ
+            var endTiming = timing + data.expedition.time;
+            if (prevTiming <= timing && endTiming <= nextTiming) {
+                console.log('OK2');
+                break;
+            }
+            // 位置補正を掛ける
+            var moveDistance1 = (prevTiming <= timing ? Constant.ALL_TIMES : prevTiming - timing); //上端が重ならないようにするための最小の下方向への移動量
+            var moveDistance2 = (endTiming <= nextTiming ? Constant.ALL_TIMES : endTiming - nextTiming); //下端が～上方向～
+            if (moveDistance1 < moveDistance2) {
+                // 下方向に動かす
+                timing = prevTiming;
+                console.log('FIX1');
+                break;
+            }
+            else {
+                // 上方向に動かす
+                timing = nextTiming - data.expedition.time;
+                console.log('FIX2');
+                break;
+            }
+        }
+        // 逆算した結果を元に座標修正を掛ける
         data.rx = Utility.fleetIndexToX(fleetIndex);
         data.ry = Utility.timingToY(timing);
         data.tx = data.rx;
         data.ty = data.ry + 18 + 2;
-        console.log('' + fleetIndex + ' ' + timing + ' ' + index);
+        console.log('' + fleetIndex + ' ' + timing + ' ' + index + '|' + data.fleetIndex + ' ' + data.timing);
+        data.fleetIndex = fleetIndex;
+        data.timing = timing;
+        // 修正した座標を反映
         d3.selectAll("g > text").filter(function (d, i) { return (i === index); })
             .attr("x", data.tx)
             .attr("y", data.ty);
