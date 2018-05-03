@@ -340,7 +340,7 @@ class MainController {
     /**
      * 遠征スケジュールを再描画する
      */
-    redrawCanvas(){
+    private redrawCanvas(){
         // 遠征タスクをまとめて消去
         this.canvas.selectAll("g").remove();
         // 遠征タスクをまとめて描画するための下地
@@ -374,6 +374,8 @@ class MainController {
             .text(function(task){
                 return task.expedition.name;
             });
+        d3.selectAll("g > rect").filter((d, i) => (i === this.selectedTaskIndex))
+            .attr("fill","orange");
     }
     /**
      * ドラッグスタート時に呼び出される関数
@@ -486,12 +488,19 @@ class MainController {
         }
     }
     /**
+     * 削除ボタンを押した際に呼び出される関数
+     */
+    private removeTask(){
+        if(this.selectedTaskIndex == -1)
+            return;
+        this.expTaskList.splice(this.selectedTaskIndex, 1);
+        this.selectedTaskIndex = -1;
+        this.redrawCanvas();
+    }
+    /**
      * コンストラクタ
      */
     constructor(){
-        // セレクトボックスを初期化
-        this.initializeAreaNameList();
-        this.initializeExpNameList();
         // expTaskListを初期化
         this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",95,0));
         this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",95,1));
@@ -509,6 +518,13 @@ class MainController {
         this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",815,2));
         // canvasを初期化
         this.initializeCanvas();
+        // セレクトボックスを初期化
+        this.initializeAreaNameList();
+        this.initializeExpNameList();
+        // ボタンを初期化
+        d3.select("#removeTask").on("click", this.removeTask.bind(this));
+        // 画面を描画
+        this.redrawCanvas();
     }
 };
 
@@ -520,6 +536,4 @@ window.onload = () => {
     DataStore.initialize();
     // Controllerを初期化
     var mc = new MainController();
-    // 画面を再描画
-    mc.redrawCanvas();
 };
