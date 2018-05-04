@@ -5,9 +5,13 @@
         "noImplicitAny": false,
         "outDir": "public",
         "rootDir": ".",
-        "sourceMap": true,
+        "sourceMap": true
     },
     "exclude": [
         "node_modules"
+    ],
+    "typeRoots" : [
+        "src/typings",
+        "node_modules/@types/"
     ]
 }
