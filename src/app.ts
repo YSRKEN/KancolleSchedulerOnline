@@ -248,6 +248,9 @@ class MainController {
             d3.selectAll("g > rect").filter((d, i) => (i === index))
                 .attr("fill","orange");
         }
+        var areaName = this.expTaskList[index].expedition.areaName;
+        var expName = this.expTaskList[index].expedition.name;
+        var nameList = DataStore.gerNameList(areaName);
         // 選択した遠征タスクの情報を画面に反映する処理
         this.initializeAreaNameList();
         d3.select("#areaName").selectAll("option")
@@ -255,15 +258,14 @@ class MainController {
                 if(i == 0)
                     return false;
                 var areaNameList = DataStore.makeAreaNameList;
-                return (areaNameList[i - 1] == this.expTaskList[index].expedition.areaName);
+                return (areaNameList[i - 1] == areaName);
             }).attr("selected", true);
         this.initializeExpNameList();
         d3.select("#expName").selectAll("option")
             .filter((d, i) => {
                 if(i == 0)
                     return false;
-                var nameList = DataStore.gerNameList(this.expTaskList[index].expedition.areaName);
-                return (nameList[i - 1] == this.expTaskList[index].expedition.name);
+                return (nameList[i - 1] == expName);
             }).attr("selected", true);
     }
     /**
@@ -276,6 +278,60 @@ class MainController {
         this.selectedTaskIndex = -1;
         this.redrawCanvas();
     }
+    /**
+     * 追加ボタンを押した際に呼び出される関数
+     */
+    private addTask(){
+        // 遠征タスクの情報を新規に作成
+        var selectedExpName = d3.select("#expName").select("option[selected='true']").property("value");
+        var addTaskData = DataStore.makeExpeditionTask(selectedExpName, 0, 0);
+        // その遠征タスクを差し込める最初の場所を検索する
+        var setTiming = Constant.ALL_TIMES;
+        var setFleetIndex = -1;
+        d3.range(0, Constant.FLEET_COUNT).forEach(fleetIndex => {
+            // 累積和のアルゴリズムにより、遠征タスクを置けない区間を求める
+            var temp = d3.range(0, Constant.ALL_TIMES).map(() => 0);
+            this.expTaskList.filter(task => task.fleetIndex == fleetIndex).forEach(task => {
+                temp[task.timing] += 1;
+                if(task.endTiming < Constant.ALL_TIMES)
+                    temp[task.endTiming] -= 1;
+            });
+            // 走査しつつ、置ける最初の位置を探す
+            var sum = 0;
+            var searchEndIndex = Math.min(temp.length - addTaskData.expedition.time, setTiming + 1);
+            for(var i = 0; i < searchEndIndex; ++i){
+                sum += temp[i];
+                if(sum != 0)
+                    continue;
+                // 「連続X個の要素について、値が全て0か」を調べる
+                var jumpPosition = d3.range(i + 1, i + addTaskData.expedition.time).find(j => temp[j] != 0);
+                if(!jumpPosition || jumpPosition - i >= addTaskData.expedition.time){
+                    console.log("OK " + i  + "," + fleetIndex);
+                    // 置けるので座標を読み取る
+                    if(setTiming > i){
+                        setTiming = i;
+                        setFleetIndex = fleetIndex;
+                    }
+                    break;
+                }else{
+                    // 置けないのでワープして再開
+                    console.log("NG " + i  + "," + fleetIndex);
+                    i = jumpPosition - 1;
+                    console.log("->->" + i);
+                }
+            }
+        });
+        // 検索した位置に遠征タスクを配置する
+        if(setFleetIndex != -1){
+            addTaskData.setTaskPosition(setFleetIndex, setTiming);
+            this.expTaskList.push(addTaskData);
+            this.redrawCanvas();
+        }
+    }
+    /**
+     * 指定したインデックスの遠征タスクの表示座標を更新する
+     * @param index 遠征タスクのインデックス
+     */
     private refreshTaskPosition(index: number){
         var data = this.expTaskList[index];
         d3.selectAll("g > text").filter((d, i) => (i === index))
@@ -311,6 +367,7 @@ class MainController {
         this.initializeExpNameList();
         // ボタンを初期化
         d3.select("#removeTask").on("click", this.removeTask.bind(this));
+        d3.select("#addTask").on("click", this.addTask.bind(this));
         // 画面を描画
         this.redrawCanvas();
     }
