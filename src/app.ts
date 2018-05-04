@@ -249,8 +249,22 @@ class MainController {
                 .attr("fill","orange");
         }
         // 選択した遠征タスクの情報を画面に反映する処理
-        d3.select("#areaName").attr("value", this.expTaskList[index].expedition.areaName);
-        d3.select("#expName").attr("value", this.expTaskList[index].expedition.name);
+        this.initializeAreaNameList();
+        d3.select("#areaName").selectAll("option")
+            .filter((d, i) => {
+                if(i == 0)
+                    return false;
+                var areaNameList = DataStore.makeAreaNameList;
+                return (areaNameList[i - 1] == this.expTaskList[index].expedition.areaName);
+            }).attr("selected", true);
+        this.initializeExpNameList();
+        d3.select("#expName").selectAll("option")
+            .filter((d, i) => {
+                if(i == 0)
+                    return false;
+                var nameList = DataStore.gerNameList(this.expTaskList[index].expedition.areaName);
+                return (nameList[i - 1] == this.expTaskList[index].expedition.name);
+            }).attr("selected", true);
     }
     /**
      * 削除ボタンを押した際に呼び出される関数
