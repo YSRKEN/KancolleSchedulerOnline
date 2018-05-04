@@ -363,6 +363,65 @@ class MainController {
         this.redrawCanvas();
     }
     /**
+     * 保存ボタンを押した際に呼び出される関数
+     */
+    private saveTask(){
+        var storage = window.localStorage;
+        storage.clear();
+        storage.setItem("selectedTaskIndex", "" + this.selectedTaskIndex);
+        var count = 1;
+        this.expTaskList.forEach(task => {
+            var text = task.expedition.name + "," + task.timing + "," + task.fleetIndex;
+            storage.setItem("Task" + count, text);
+            ++count;
+        });
+    }
+    /**
+     * 読込ボタンを押した際に呼び出される関数
+     */
+    private loadTask(){
+        // 初期化
+        var storage = window.localStorage;
+        this.selectedTaskIndex = -1;
+        var temp = new Array<ExpeditionTask>();
+        // 読み込み
+        for(var i = 0; i < storage.length; ++i){
+            var value = storage.getItem(storage.key(i));
+            // キーの内容によって分岐
+            if(storage.key(i) == "selectedTaskIndex"){
+                // 選択している遠征タスクのインデックス
+                this.selectedTaskIndex = parseInt(value);
+                if(isNaN(this.selectedTaskIndex))
+                    this.selectedTaskIndex = -1;
+            }
+            if(storage.key(i).substr(0, 4) == "Task"){
+                // 遠征タスク。「海上護衛任務,120,2」のように記録されている
+                //パースできるかを確認
+                var temp2 = value.split(",");
+                if(temp2.length != 3)
+                    continue;
+                //遠征名・タイミング・艦隊番号を取得
+                var expName = temp2[0];
+                var timing = parseInt(temp2[1]);
+                var fleetIndex = parseInt(temp2[2]);
+                if(DataStore.getExpedition(expName) == null
+                    || isNaN(timing) || isNaN(fleetIndex))
+                    continue;
+                timing = Utility.Limit(timing, 0, Constant.ALL_TIMES - 1);
+                fleetIndex = Utility.Limit(fleetIndex, 0, Constant.FLEET_COUNT - 1);
+                // 書き込み
+                temp.push(DataStore.makeExpeditionTask(expName, timing, fleetIndex));
+            }
+        }
+        // 遠征タスク数≦選択インデックス数だった場合に備える
+        if(this.selectedTaskIndex >= 0){
+            this.selectedTaskIndex = Utility.Limit(this.selectedTaskIndex, 0, temp.length);
+        }
+        // 書き込み・反映
+        this.expTaskList = temp;
+        this.redrawCanvas();
+    }
+    /**
      * 指定したインデックスの遠征タスクの表示座標を更新する
      * @param index 遠征タスクのインデックス
      */
@@ -379,21 +438,6 @@ class MainController {
      * コンストラクタ
      */
     constructor(){
-        // expTaskListを初期化
-        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",95,0));
-        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",95,1));
-        this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",95,2));
-        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",230,0));
-        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",185,1));
-        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",425,0));
-        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",815,0));
-        this.expTaskList.push(DataStore.makeExpeditionTask("長時間対潜警戒",950,0));
-        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",425,1));
-        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",815,1));
-        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",905,1));
-        this.expTaskList.push(DataStore.makeExpeditionTask("強行偵察任務",995,1));
-        this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",425,2));
-        this.expTaskList.push(DataStore.makeExpeditionTask("鼠輸送作戦",815,2));
         // canvasを初期化
         this.initializeCanvas();
         // セレクトボックスを初期化
@@ -403,6 +447,8 @@ class MainController {
         d3.select("#removeTask").on("click", this.removeTask.bind(this));
         d3.select("#addTask").on("click", this.addTask.bind(this));
         d3.select("#changeTask").on("click", this.changeTask.bind(this));
+        d3.select("#saveTask").on("click", this.saveTask.bind(this));
+        d3.select("#loadTask").on("click", this.loadTask.bind(this));
         // 画面を描画
         this.redrawCanvas();
     }
