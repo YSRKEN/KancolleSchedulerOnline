@@ -8,83 +8,79 @@
     <script src="public/bundle.js"></script>
 </head>
 <body>
-    <table>
-        <tr>
-            <td colspan="2">
-                <h1>　艦これスケジューラー</h1>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div id="canvas"/>
-            </td>
-            <td valign="top">
-                <h2>○GitHubのページ</h2>
-                <a href="https://github.com/YSRKEN/KancolleSchedulerOnline">https://github.com/YSRKEN/KancolleSchedulerOnline</a>
-                <h2>○遠征タスクの操作</h2>
-                <form>
-                    <table class="task_operation">
-                        <tr>
-                            <td>
-                                遠征の海域名
-                            </td>
-                            <td>
-                                <select id="areaName" style="width: 150px;"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                遠征名
-                            </td>
-                            <td>
-                                <select id="expName" style="width: 150px;"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                大発による収入補正
-                            </td>
-                            <td>
-                                <select id="addPer">
-                                    <option value="0">なし</option>
-                                    <option value="5">＋5％</option>
-                                    <option value="10">＋10％</option>
-                                    <option value="15">＋15％</option>
-                                    <option value="20">＋20％</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                遠征が大成功するか
-                            </td>
-                            <td>
-                                <input type="checkbox" id="ciFlg"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                ケッコン艦に行かせたか
-                            </td>
-                            <td>
-                                <input type="checkbox" id="marriageFlg"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" align="center">
-                                <input type="button" value="追加" id="addTask"/>
-                                <input type="button" value="変更" id="changeTask"/>
-                                <input type="button" value="削除" id="removeTask"/>
-                                <input type="button" value="保存" id="saveTask"/>
-                                <input type="button" value="読込" id="loadTask"/>
-                            </td>
-                        </tr>
-                    </table>
-                </form>
-                <h2>○遠征の総収入</h2>
-                <p id="supplyResult" style="border-style: ridge">テスト<br>テストテスト<br>テストテストテスト<br>テストテストテストテスト</p>
-            </td>
-        </tr>
-    </table>
+    <header>
+            <h1 class="sticky">艦これスケジューラー</h1>
+    </header>
+    <main>
+        <section>
+            <div id="canvas"/>
+        </section>
+        <aside>
+            <h2>○GitHubのページ</h2>
+            <a href="https://github.com/YSRKEN/KancolleSchedulerOnline">https://github.com/YSRKEN/KancolleSchedulerOnline</a>
+            <h2>○遠征タスクの操作</h2>
+            <form>
+                <table class="task_operation">
+                    <tr>
+                        <td>
+                            遠征の海域名
+                        </td>
+                        <td>
+                            <select id="areaName" style="width: 150px;"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            遠征名
+                        </td>
+                        <td>
+                            <select id="expName" style="width: 150px;"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            大発による収入補正
+                        </td>
+                        <td>
+                            <select id="addPer">
+                                <option value="0">なし</option>
+                                <option value="5">＋5％</option>
+                                <option value="10">＋10％</option>
+                                <option value="15">＋15％</option>
+                                <option value="20">＋20％</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            遠征が大成功するか
+                        </td>
+                        <td>
+                            <input type="checkbox" id="ciFlg"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ケッコン艦に行かせたか
+                        </td>
+                        <td>
+                            <input type="checkbox" id="marriageFlg"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <input type="button" value="追加" id="addTask"/>
+                            <input type="button" value="変更" id="changeTask"/>
+                            <input type="button" value="削除" id="removeTask"/>
+                            <input type="button" value="保存" id="saveTask"/>
+                            <input type="button" value="読込" id="loadTask"/>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            <h2>○遠征の総収入</h2>
+            <p id="supplyResult" style="border-style: ridge">テスト<br>テストテスト<br>テストテストテスト<br>テストテストテストテスト</p>
+        </aside>
+    </main>
 </body>
 </html>
