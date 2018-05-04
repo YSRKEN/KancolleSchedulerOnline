@@ -283,7 +283,7 @@ class MainController {
      */
     private addTask(){
         // 遠征タスクの情報を新規に作成
-        var selectedExpName = d3.select("#expName").select("option[selected='true']").property("value");
+        var selectedExpName = d3.select("#expName").property("value");
         var addTaskData = DataStore.makeExpeditionTask(selectedExpName, 0, 0);
         // その遠征タスクを差し込める最初の場所を検索する
         var setTiming = Constant.ALL_TIMES;
