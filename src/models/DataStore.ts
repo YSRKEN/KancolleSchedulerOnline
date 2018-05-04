@@ -46,7 +46,14 @@ export class DataStore {
     static get makeAreaNameList(){
         return this.expeditionList.map(e => e.areaName).filter((x, i, self) => self.indexOf(x) === i);
     }
-    static gerNameList(areaName: string){
+    /**
+     * 指定した海域における遠征名の一覧を返す
+     * @param areaName 海域名
+     */
+    static getNameList(areaName: string){
         return this.expeditionList.filter(e => e.areaName == areaName).map(e => e.name);
+    }
+    static getExpedition(expName: string){
+        return this.expeditionList.filter(e => e.name == expName)[0];
     }
 };

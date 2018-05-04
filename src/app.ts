@@ -82,7 +82,7 @@ class MainController {
      */
     private initializeExpNameList(){
         var areaName = d3.select("#areaName").property('value');
-        var nameList = DataStore.gerNameList(areaName);
+        var nameList = DataStore.getNameList(areaName);
         nameList.unshift("---");
         d3.select("#expName")
             .selectAll("option").remove();
@@ -250,7 +250,7 @@ class MainController {
         }
         var areaName = this.expTaskList[index].expedition.areaName;
         var expName = this.expTaskList[index].expedition.name;
-        var nameList = DataStore.gerNameList(areaName);
+        var nameList = DataStore.getNameList(areaName);
         // 選択した遠征タスクの情報を画面に反映する処理
         this.initializeAreaNameList();
         d3.select("#areaName").selectAll("option")
@@ -272,10 +272,14 @@ class MainController {
      * 削除ボタンを押した際に呼び出される関数
      */
     private removeTask(){
+        // 未選択なら何もしない
         if(this.selectedTaskIndex == -1)
             return;
+        // 選択した遠征の部分を削除する
         this.expTaskList.splice(this.selectedTaskIndex, 1);
+        // 遠征の選択を外す
         this.selectedTaskIndex = -1;
+        // 再描画
         this.redrawCanvas();
     }
     /**
@@ -284,6 +288,8 @@ class MainController {
     private addTask(){
         // 遠征タスクの情報を新規に作成
         var selectedExpName = d3.select("#expName").property("value");
+        if(selectedExpName == "---")
+            return;
         var addTaskData = DataStore.makeExpeditionTask(selectedExpName, 0, 0);
         // その遠征タスクを差し込める最初の場所を検索する
         var setTiming = Constant.ALL_TIMES;
@@ -329,6 +335,34 @@ class MainController {
         }
     }
     /**
+     * 変更ボタンを押した際に呼び出される関数
+     */
+    private changeTask(){
+        // セレクトボックスで選択している遠征名を取得
+        var selectedExpName = d3.select("#expName").property("value");
+        if(selectedExpName == "---")
+            return;
+        // 当該遠征についての情報を得る
+        var expedition = DataStore.getExpedition(selectedExpName);
+        // 選択した遠征の次に来る遠征の開始時間を得る
+        if(this.selectedTaskIndex == -1)
+            return;
+        var selectedTask = this.expTaskList[this.selectedTaskIndex];
+        var temp = this.expTaskList.filter(
+            task => task.fleetIndex == selectedTask.fleetIndex
+            && task.hash != selectedTask.hash
+            && task.timing >= selectedTask.endTiming);
+        if(temp.length == 0)
+            return;
+        var nextTiming = temp.sort((a, b) => a.timing - b.timing)[0].timing;
+        // 遠征を変更できるかを判定する
+        if(nextTiming - selectedTask.timing < expedition.time)
+            return;
+        // 変更する
+        this.expTaskList[this.selectedTaskIndex] = DataStore.makeExpeditionTask(selectedExpName, selectedTask.timing, selectedTask.fleetIndex);
+        this.redrawCanvas();
+    }
+    /**
      * 指定したインデックスの遠征タスクの表示座標を更新する
      * @param index 遠征タスクのインデックス
      */
@@ -368,6 +402,7 @@ class MainController {
         // ボタンを初期化
         d3.select("#removeTask").on("click", this.removeTask.bind(this));
         d3.select("#addTask").on("click", this.addTask.bind(this));
+        d3.select("#changeTask").on("click", this.changeTask.bind(this));
         // 画面を描画
         this.redrawCanvas();
     }
