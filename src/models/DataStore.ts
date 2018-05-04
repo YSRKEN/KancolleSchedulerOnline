@@ -15,17 +15,16 @@ export class DataStore {
     /**
      * データベースを初期化
      */
-    static initialize() {
-        DataStore.expeditionList = new Array<Expedition>();
-        d3.csv(csv).then((data) => {
-            data.forEach(row => {
+    static async initialize() {
+        DataStore.expeditionList = await d3.csv(csv).then((data) => {
+            return data.map(row => {
                 var areaName = row["海域名"];
                 var name = row["遠征名"];
                 var time = parseInt(row["遠征時間"]);
                 var color1 = parseInt(row["色1"]);
                 var color2 = parseInt(row["色2"]);
                 var exp = new Expedition(areaName,name,time,color1,color2);
-                DataStore.expeditionList.push(exp);
+                return exp;
             });
         });
     }

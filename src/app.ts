@@ -305,9 +305,9 @@ class MainController {
 /**
  * スタートアップ
  */
-window.onload = () => {
+window.onload = async function(){
     // データベースを初期化
-    DataStore.initialize();
+    await DataStore.initialize();
     // Controllerを初期化
     var mc = new MainController();
 };
