@@ -72,6 +72,8 @@ class MainController {
     private initializeAreaNameList(){
         var areaNameList = DataStore.makeAreaNameList;
         areaNameList.unshift("---");
+        d3.select("#areaName")
+            .selectAll("option").remove();
         d3.select("#areaName").on("change", this.initializeExpNameList)
             .selectAll("option").data(areaNameList).enter()
             .append("option").attr("value", d => d).text(d => d);
@@ -249,6 +251,7 @@ class MainController {
                 .attr("fill","orange");
         }
         var areaName = this.expTaskList[index].expedition.areaName;
+        var areaNameList = DataStore.makeAreaNameList;
         var expName = this.expTaskList[index].expedition.name;
         var nameList = DataStore.getNameList(areaName);
         // 選択した遠征タスクの情報を画面に反映する処理
@@ -257,7 +260,6 @@ class MainController {
             .filter((d, i) => {
                 if(i == 0)
                     return false;
-                var areaNameList = DataStore.makeAreaNameList;
                 return (areaNameList[i - 1] == areaName);
             }).attr("selected", true);
         this.initializeExpNameList();
