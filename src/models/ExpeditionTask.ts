@@ -35,6 +35,18 @@ export class ExpeditionTask {
     * 遠征名のy座標
     */
     ty: number;
+    /**
+     * 大発による収入補正(％)
+     */
+    addPer: number;
+    /**
+     * 遠征が大成功するか
+     */
+    ciFlg: boolean;
+    /**
+     * ケッコン艦に行かせたか
+     */
+    marriageFlg: boolean;
 
     /**
     * コンストラクタ
@@ -48,8 +60,11 @@ export class ExpeditionTask {
         this.fleetIndex = fleetIndex;
         this.rx = Utility.fleetIndexToX(fleetIndex);
         this.ry = Utility.timingToY(timing);
-        this.tx = this.rx;
-        this.ty = this.ry + 18 + 2;
+        this.tx = this.rx + 3;
+        this.ty = this.ry + 18 + 3;
+        this.addPer = 0;
+        this.ciFlg = false;
+        this.marriageFlg = false;
     }
     /**
     * 遠征の終了タイミング

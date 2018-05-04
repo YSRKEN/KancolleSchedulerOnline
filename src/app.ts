@@ -250,25 +250,20 @@ class MainController {
             d3.selectAll("g > rect").filter((d, i) => (i === index))
                 .attr("fill","orange");
         }
-        var areaName = this.expTaskList[index].expedition.areaName;
+        // 選択した遠征タスクの情報を画面に反映するための下準備
+        var task = this.expTaskList[index];
+        var areaName = task.expedition.areaName;
         var areaNameList = DataStore.makeAreaNameList;
-        var expName = this.expTaskList[index].expedition.name;
+        var expName = task.expedition.name;
         var nameList = DataStore.getNameList(areaName);
         // 選択した遠征タスクの情報を画面に反映する処理
         this.initializeAreaNameList();
-        d3.select("#areaName").selectAll("option")
-            .filter((d, i) => {
-                if(i == 0)
-                    return false;
-                return (areaNameList[i - 1] == areaName);
-            }).attr("selected", true);
+        d3.select("#areaName").property("value", "" + areaName);
         this.initializeExpNameList();
-        d3.select("#expName").selectAll("option")
-            .filter((d, i) => {
-                if(i == 0)
-                    return false;
-                return (nameList[i - 1] == expName);
-            }).attr("selected", true);
+        d3.select("#expName").property("value", "" + expName);
+        d3.select("#addPer").property("value", "" + task.addPer);
+        d3.select("#ciFlg").property("checked", task.ciFlg);
+        d3.select("#marriageFlg").property("checked", task.marriageFlg);
     }
     /**
      * 削除ボタンを押した際に呼び出される関数
@@ -332,6 +327,9 @@ class MainController {
         // 検索した位置に遠征タスクを配置する
         if(setFleetIndex != -1){
             addTaskData.setTaskPosition(setFleetIndex, setTiming);
+            addTaskData.addPer = parseInt(d3.select("#addPer").property("value"));
+            addTaskData.ciFlg = d3.select("#ciFlg").property("checked");
+            addTaskData.marriageFlg = d3.select("#marriageFlg").property("checked");
             this.expTaskList.push(addTaskData);
             this.redrawCanvas();
         }
@@ -346,22 +344,29 @@ class MainController {
             return;
         // 当該遠征についての情報を得る
         var expedition = DataStore.getExpedition(selectedExpName);
-        // 選択した遠征の次に来る遠征の開始時間を得る
+        // マウスで選択した遠征についての情報を得る
         if(this.selectedTaskIndex == -1)
             return;
         var selectedTask = this.expTaskList[this.selectedTaskIndex];
-        var temp = this.expTaskList.filter(
-            task => task.fleetIndex == selectedTask.fleetIndex
-            && task.hash != selectedTask.hash
-            && task.timing >= selectedTask.endTiming);
-        if(temp.length == 0)
-            return;
-        var nextTiming = temp.sort((a, b) => a.timing - b.timing)[0].timing;
-        // 遠征を変更できるかを判定する
-        if(nextTiming - selectedTask.timing < expedition.time)
-            return;
-        // 変更する
-        this.expTaskList[this.selectedTaskIndex] = DataStore.makeExpeditionTask(selectedExpName, selectedTask.timing, selectedTask.fleetIndex);
+        // 遠征名の変更処理
+        if(selectedTask.expedition.name != selectedExpName){
+            // 選択した遠征の次に来る遠征の開始時間を得る
+            var temp = this.expTaskList.filter(
+                task => task.fleetIndex == selectedTask.fleetIndex
+                && task.hash != selectedTask.hash
+                && task.timing >= selectedTask.endTiming);
+            if(temp.length > 0){
+                var nextTiming = temp.sort((a, b) => a.timing - b.timing)[0].timing;
+                // 遠征を変更できるかを判定する
+                if(nextTiming - selectedTask.timing >= expedition.time){
+                    selectedTask = DataStore.makeExpeditionTask(selectedExpName, selectedTask.timing, selectedTask.fleetIndex);
+                }
+            }
+        }
+        // その他の情報を変更
+        selectedTask.addPer = parseInt(d3.select("#addPer").property("value"));
+        selectedTask.ciFlg = d3.select("#ciFlg").property("checked");
+        selectedTask.marriageFlg = d3.select("#marriageFlg").property("checked");
         this.redrawCanvas();
     }
     /**
@@ -373,7 +378,8 @@ class MainController {
         storage.setItem("selectedTaskIndex", "" + this.selectedTaskIndex);
         var count = 1;
         this.expTaskList.forEach(task => {
-            var text = task.expedition.name + "," + task.timing + "," + task.fleetIndex;
+            var text = task.expedition.name + "," + task.timing + "," + task.fleetIndex
+                + "," + task.addPer + "," + (task.ciFlg ? 1 : 0) + "," + (task.marriageFlg ? 1 : 0);
             storage.setItem("Task" + count, text);
             ++count;
         });
@@ -400,7 +406,7 @@ class MainController {
                 // 遠征タスク。「海上護衛任務,120,2」のように記録されている
                 //パースできるかを確認
                 var temp2 = value.split(",");
-                if(temp2.length != 3)
+                if(temp2.length < 3)
                     continue;
                 //遠征名・タイミング・艦隊番号を取得
                 var expName = temp2[0];
@@ -411,8 +417,22 @@ class MainController {
                     continue;
                 timing = Utility.Limit(timing, 0, Constant.ALL_TIMES - 1);
                 fleetIndex = Utility.Limit(fleetIndex, 0, Constant.FLEET_COUNT - 1);
+                // 可能なら、収入補正・大成功フラグ・ケッコン艦フラグを読み取る
+                var addPer = 0;
+                var ciFlg = false;
+                var marriageFlg = false; 
+                if(temp2.length >= 6){
+                    addPer = Math.floor(parseInt(temp2[3]) / 5) * 5;
+                    addPer = Utility.Limit(addPer, 0, 20);
+                    ciFlg = (parseInt(temp2[4]) > 0);
+                    marriageFlg = (parseInt(temp2[5]) > 0);
+                }
                 // 書き込み
-                temp.push(DataStore.makeExpeditionTask(expName, timing, fleetIndex));
+                var temp3 = DataStore.makeExpeditionTask(expName, timing, fleetIndex);
+                temp3.addPer = addPer;
+                temp3.ciFlg = ciFlg;
+                temp3.marriageFlg = marriageFlg;
+                temp.push(temp3);
             }
         }
         // 遠征タスク数≦選択インデックス数だった場合に備える
