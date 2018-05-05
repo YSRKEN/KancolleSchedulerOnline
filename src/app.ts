@@ -516,4 +516,20 @@ window.onload = async function(){
     await DataStore.initialize();
     // Controllerを初期化
     var mc = new MainController();
+    // UA判定
+    var userAgent = window.navigator.userAgent;
+    if(userAgent.indexOf('iphone') != -1) {
+        console.log('iPhone');
+    } else if(userAgent.indexOf('ipad') != -1) {
+        console.log('iPad');
+    } else if(userAgent.indexOf('android') != -1) {
+        if(userAgent.indexOf('mobile') != -1) {
+            console.log('android(スマホ)');
+        } else {
+            console.log('android(タブレット)');
+        }
+    } else {
+        console.log('PC')
+    }
+    console.log(userAgent);
 };
