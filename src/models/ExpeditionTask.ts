@@ -82,8 +82,8 @@ export class ExpeditionTask {
     setTaskPosition(fleetIndex, timing){
         this.rx = Utility.fleetIndexToX(fleetIndex);
         this.ry = Utility.timingToY(timing);
-        this.tx = this.rx;
-        this.ty = this.ry + 18 + 2;
+        this.tx = this.rx + 3;
+        this.ty = this.ry + 18 + 3;
         this.fleetIndex = fleetIndex;
         this.timing = timing;
     }
