@@ -8,13 +8,13 @@ header{
     border: 1px solid black;
 }
 
-.main{
+main{
     padding: 120px 0 0 0;
     display: flex;
     flex-flow: row;
 }
 
-.section{
+section{
     flex: 0 0 530px;
 }
 
