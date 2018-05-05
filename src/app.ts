@@ -37,8 +37,8 @@ class MainController {
             .data(d3.range(Constant.FLEET_COUNT + 1))
             .enter()
             .append("line")
-            .attr("x1", w => Utility.fleetIndexToX(w))
-            .attr("x2", w => Utility.fleetIndexToX(w))
+            .attr("x1", w => Utility.fleetIndexToX(w) + 0.5)
+            .attr("x2", w => Utility.fleetIndexToX(w) + 0.5)
             .attr("y1", Utility.timingToY(0))
             .attr("y2", Utility.timingToY(Constant.ALL_TIMES))
             .attr("stroke-width", 1)
@@ -49,8 +49,8 @@ class MainController {
             .data(d3.range(24 + 1))
             .enter()
             .append("line")
-            .attr("y1", h => Utility.timingToY(60 * h))
-            .attr("y2", h => Utility.timingToY(60 * h))
+            .attr("y1", h => Utility.timingToY(60 * h) + 0.5)
+            .attr("y2", h => Utility.timingToY(60 * h) + 0.5)
             .attr("x1", Utility.fleetIndexToX(0))
             .attr("x2", Utility.fleetIndexToX(Constant.FLEET_COUNT))
             .attr("stroke-width", 1)
@@ -114,14 +114,14 @@ class MainController {
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
         tasks.append("rect")
-            .attr("x", function(task) { return task.rx; })
-            .attr("y", function(task) { return task.ry; })
+            .attr("x", function(task) { return task.rx + 0.5; })
+            .attr("y", function(task) { return task.ry + 0.5; })
             .attr("width",Constant.TASK_WIDTH)
             .attr("height",function(task){
                 return Constant.TASK_HEIGHT_PER_TIME * task.expedition.time;
             })
             .attr("stroke", "black")
-            .style("opacity", 0.8)
+            .style("fill-opacity", 0.8)
             .attr("fill","skyblue");
         // (文字は18pxで、遠征タスク枠の左上に横向きで描画)
         tasks.append("text")
@@ -157,8 +157,8 @@ class MainController {
         data.tx += d3.event.dx;
         data.ty += d3.event.dy;
         d3.selectAll("g > rect").filter((d, i) => (i === index))
-            .attr("x", data.rx)
-            .attr("y", data.ry);
+            .attr("x", data.rx + 0.5)
+            .attr("y", data.ry + 0.5);
         d3.selectAll("g > text").filter((d, i) => (i === index))
             .attr("x", data.tx)
             .attr("y", data.ty);
@@ -460,8 +460,8 @@ class MainController {
             .attr("x", data.tx)
             .attr("y", data.ty);
         d3.selectAll("g > rect").filter((d, i) => (i === index))
-            .attr("x", data.rx)
-            .attr("y", data.ry);
+            .attr("x", data.rx + 0.5)
+            .attr("y", data.ry + 0.5);
     }
     /**
      * 遠征の総収入を計算する
