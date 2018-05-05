@@ -3,7 +3,7 @@
 header{
     position: fixed;
     background-color: white;
-    width: 100%;
+    width: calc(100% - 60px);
     padding: 0 0 0 30px;
     border: 1px solid black;
 }
@@ -23,6 +23,7 @@ header{
     position: -webkit-sticky;
     position: sticky;
     top: 120px;
+    left: 0;
 }
 
 table.task_operation{
