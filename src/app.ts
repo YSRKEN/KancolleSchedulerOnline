@@ -527,5 +527,14 @@ window.onload = async function(){
     }else{
         // モバイル判定
         console.log("Mobile");
+        d3.select("#removeTask").style("font-size", "30px");
+        d3.select("#addTask").style("font-size", "30px");
+        d3.select("#changeTask").style("font-size", "30px");
+        d3.select("#saveTask").style("font-size", "30px");
+        d3.select("#areaName").style("font-size", "30px");
+        d3.select("#expName").style("font-size", "30px");
+        d3.select("#addPer").style("font-size", "30px");
+        d3.select("#supplyResult").style("font-size", "30px");
+        d3.selectAll("h2").style("font-size", "40px");
     }
 };

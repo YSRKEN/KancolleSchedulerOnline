@@ -4,6 +4,7 @@ header{
     position: fixed;
     background-color: white;
     width: calc(100% - 60px);
+    height: 120px;
     padding: 0 0 0 30px;
     border: 1px solid black;
 }
@@ -22,7 +23,7 @@ section{
     flex: 1 1 400px;
     position: -webkit-sticky;
     position: sticky;
-    top: 120px;
+    top: 130px;
 }
 
 table.task_operation{
