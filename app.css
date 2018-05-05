@@ -8,19 +8,21 @@ header{
     border: 1px solid black;
 }
 
-main{
+.main{
     padding: 120px 0 0 0;
     display: flex;
-	flex-flow: row;
+    flex-flow: row;
 }
 
-section{flex: 0 0 530px;}
+.section{
+    flex: 0 0 530px;
+}
 
-aside{
+.aside{
     flex: 1 1 400px;
     position: -webkit-sticky;
     position: sticky;
-    top: 0px;
+    top: 120px;
 }
 
 table.task_operation{
