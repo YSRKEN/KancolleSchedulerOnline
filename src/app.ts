@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import * as UAParser from 'ua-parser-js';
 import constant = require("./models/Constant"); import Constant = constant.Constant;
 import utility = require("./models/Utility"); import Utility = utility.Utility;
 import dataStore = require("./models/DataStore"); import DataStore = dataStore.DataStore;
@@ -518,18 +519,13 @@ window.onload = async function(){
     var mc = new MainController();
     // UA判定
     var userAgent = window.navigator.userAgent;
-    if(userAgent.indexOf('iphone') != -1) {
-        console.log('iPhone');
-    } else if(userAgent.indexOf('ipad') != -1) {
-        console.log('iPad');
-    } else if(userAgent.indexOf('android') != -1) {
-        if(userAgent.indexOf('mobile') != -1) {
-            console.log('android(スマホ)');
-        } else {
-            console.log('android(タブレット)');
-        }
-    } else {
-        console.log('PC')
+    var parser = new UAParser(userAgent);
+    var result = parser.getResult();
+    if(result.device.type == null){
+        // PC判定
+        console.log("PC");
+    }else{
+        // モバイル判定
+        console.log("Mobile");
     }
-    console.log(userAgent);
 };
