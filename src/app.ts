@@ -470,7 +470,8 @@ class MainController {
         d3.select("#addTask").on("click", this.addTask.bind(this));
         d3.select("#changeTask").on("click", this.changeTask.bind(this));
         d3.select("#saveTask").on("click", this.saveTask.bind(this));
-        d3.select("#loadTask").on("click", this.loadTask.bind(this));
+        // ローカルストレージから自動読み込み
+        this.loadTask();
         // 画面を描画
         this.redrawCanvas();
     }
