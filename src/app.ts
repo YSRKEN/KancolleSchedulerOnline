@@ -129,8 +129,13 @@ class MainController {
             .text(function(task){
                 return task.expedition.name;
             });
+        // 選択している遠征タスクについての着色
         d3.selectAll("g > rect").filter((d, i) => (i === this.selectedTaskIndex))
             .attr("fill","orange");
+        // 遠征スケジュールについての情報表示を更新する
+        var allSupply = this.calcAllSupply();
+        var infoText = this.supplyToText(allSupply);
+        d3.select("#supplyResult").html(infoText);
     }
     /**
      * ドラッグスタート時に呼び出される関数
@@ -455,6 +460,32 @@ class MainController {
         d3.selectAll("g > rect").filter((d, i) => (i === index))
             .attr("x", data.rx)
             .attr("y", data.ry);
+    }
+    /**
+     * 遠征の総収入を計算する
+     */
+    private calcAllSupply(){
+        var allSupply = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+        this.expTaskList.forEach(task => {
+            var supply = task.calcSupplyInfo();
+            d3.range(0, allSupply.length).forEach(i => {
+                allSupply[i] += supply[i];
+            });
+        });
+        return allSupply;
+    }
+    /**
+     * 遠征の総収入をテキストに変換する
+     */
+    private supplyToText(allSupply: number[]){
+        var label = ["燃料", "弾薬", "鋼材", "ボーキ", "バケツ", "バーナー", "開発資材", "家具コイン"];
+        var text = d3.range(0, allSupply.length).map(i => {
+            if(allSupply[i] != 0.0)
+                return label[i] + "：" + allSupply[i];
+            else
+                return "";
+        }).filter(str => str != "").join("<br>");
+        return text;
     }
     /**
      * コンストラクタ

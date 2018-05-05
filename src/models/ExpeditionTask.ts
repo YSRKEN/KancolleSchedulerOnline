@@ -93,4 +93,10 @@ export class ExpeditionTask {
     rewindTaskPosition(){
         this.setTaskPosition(this.fleetIndex, this.timing);
     }
+    /**
+     * 遠征の収益を計算して返す
+     */
+    calcSupplyInfo(){
+        return this.expedition.calcSupplyInfo(this.addPer, this.ciFlg, this.marriageFlg);
+    }
 };
