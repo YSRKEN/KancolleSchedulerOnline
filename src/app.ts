@@ -24,7 +24,8 @@ class MainController {
      */
     private canvas = d3.select("#canvas").append("svg")
         .attr("width", Constant.CANVAS_WIDTH)
-        .attr("height", Constant.CANVAS_HEIGHT);
+        .attr("height", Constant.CANVAS_HEIGHT)
+        .attr("viewBox", "0,0," + Constant.CANVAS_WIDTH + "," + Constant.CANVAS_HEIGHT);
     private selectedTaskIndex: number = -1;
     /**
      * 遠征タスクを初期化
