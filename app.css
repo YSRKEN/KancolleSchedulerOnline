@@ -39,3 +39,33 @@ table.task_operation td{
     padding:5px;
     border: 1px #000000 solid;
 }
+
+.svg-line {
+    stroke-width: 1px;
+    stroke: #000;
+}
+
+.svg-hours {
+    color: #000;
+    font-size: 18px;
+}
+
+.svg-task {
+    stroke: #000;
+    fill-opacity: 0.8;
+}
+
+.svg-task_text {
+    font-size: 18px;
+    color: #000;
+}
+
+@media (max-width: 580px) {
+    #removeTask, #addTask, #changeTask, #saveTask, #areaName,
+    #expName, #addPer, #supplyResult {
+        font-size: 30px;
+    }
+    h2 {
+        font-size: 40px;
+    }
+}
