@@ -23,7 +23,23 @@ export class DataStore {
                 var time = parseInt(row["遠征時間"]);
                 var color1 = parseInt(row["色1"]);
                 var color2 = parseInt(row["色2"]);
-                var exp = new Expedition(areaName,name,time,color1,color2);
+                var supply = [
+                    parseInt(row["報酬燃料"]),
+                    parseInt(row["報酬弾薬"]),
+                    parseInt(row["報酬鋼材"]),
+                    parseInt(row["報酬ボーキ"]),
+                    parseInt(row["左側バケツ"]),
+                    parseInt(row["左側バーナー"]),
+                    parseInt(row["左側ギア"]),
+                    parseInt(row["左側コイン"]),
+                    parseInt(row["右側バケツ"]),
+                    parseInt(row["右側バーナー"]),
+                    parseInt(row["右側ギア"]),
+                    parseInt(row["右側コイン"]),
+                    parseInt(row["消費燃料"]),
+                    parseInt(row["消費弾薬"])
+                ];
+                var exp = new Expedition(areaName,name,time,color1,color2, supply);
                 return exp;
             });
         });

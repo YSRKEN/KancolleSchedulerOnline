@@ -22,6 +22,22 @@ export class Expedition {
      */
     private _color: number[];
     get color(): number[] { return this._color; }
+    /**
+     * 基本報酬についての情報
+     */
+    private _basicSupply: number[];
+    /**
+     * 特殊報酬についての情報(左側)
+     */
+    private _extraSupply1: number[];
+    /**
+     * 特殊報酬についての情報(右側)
+     */
+    private _extraSupply2: number[];
+    /**
+     * 遠征による消費コスト
+     */
+    private _basicCost: number[];
 
     /**
      * コンストラクタ
@@ -31,10 +47,14 @@ export class Expedition {
      * @param color1 色1
      * @param color2 色2
      */
-    constructor(areaName: string, name: string, time: number, color1: number, color2: number) {
+    constructor(areaName: string, name: string, time: number, color1: number, color2: number, supply: number[]) {
         this._areaName = areaName;
         this._name = name;
         this._time = time;
         this._color = [color1, color2];
+        this._basicSupply = supply.slice(0, 4);
+        this._extraSupply1 = supply.slice(4, 8);
+        this._extraSupply2 = supply.slice(8, 12);
+        this._basicCost = supply.slice(12, 14);
     }
 };
