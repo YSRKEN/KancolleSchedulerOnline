@@ -1,20 +1,4 @@
-﻿body {
-    font-family: 'Segoe UI', sans-serif;
-}
-
-main{
-    padding: 120px 0 0 0;
-    display: flex;
-	flex-flow: row;
-}
-
-aside{
-    flex: 1 1 400px;
-}
-
-section{
-    flex: 0 0 530px;
-}
+﻿body {font-family: 'Segoe UI', sans-serif;}
 
 header{
     position: fixed;
@@ -24,8 +8,19 @@ header{
     border: 1px solid black;
 }
 
-span {
-    font-style: italic;
+main{
+    padding: 120px 0 0 0;
+    display: flex;
+	flex-flow: row;
+}
+
+section{flex: 0 0 530px;}
+
+aside{
+    flex: 1 1 400px;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
 }
 
 table.task_operation{
