@@ -20,7 +20,7 @@ Expedition Schedule Maker by TypeScript+D3.js
 　このWebアプリケーションは、以下の方々の協力なしには作れませんでした。本当にありがとうございます。
 
 - ソフトウェアの着想は、「名無しのでち公([@goyadeti](https://twitter.com/goyadeti))」さんから得ました
-- Webアプリ設計の際、ノエルさん・白山風露さん・ABAB↑↓BAさん・BaHo猫さんなどから情報・指摘を賜りました
+- Webアプリ設計の際、ノエルさん・白山風露さん・ABAB↑↓BAさん・BaHo猫さん・Chikuzenさんなどから情報・指摘を賜りました
 
 # 作者
 
