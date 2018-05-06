@@ -24,36 +24,34 @@ class MainController {
      */
     private canvas = d3.select("#canvas").append("svg")
         .attr("width", Constant.CANVAS_WIDTH)
-        .attr("height", Constant.CANVAS_HEIGHT);
+        .attr("height", Constant.CANVAS_HEIGHT)
+        .attr("viewBox", "0,0," + Constant.CANVAS_WIDTH + "," + Constant.CANVAS_HEIGHT);
     private selectedTaskIndex: number = -1;
     /**
      * 遠征タスクを初期化
      */
     private initializeCanvas(){
         // 縦方向の罫線
-        // (太さ1の黒い実線)
         this.canvas.selectAll("line.cl").classed("cl", true)
             .data(d3.range(Constant.FLEET_COUNT + 1))
             .enter()
             .append("line")
-            .attr("x1", w => Utility.fleetIndexToX(w))
-            .attr("x2", w => Utility.fleetIndexToX(w))
+            .attr("x1", w => Utility.fleetIndexToX(w) + 0.5)
+            .attr("x2", w => Utility.fleetIndexToX(w) + 0.5)
             .attr("y1", Utility.timingToY(0))
             .attr("y2", Utility.timingToY(Constant.ALL_TIMES))
-            .attr("stroke-width", 1)
-            .attr("stroke", "black");
+            .attr("class", "svg-line");
         // 横方向の罫線と時刻表示
-        // (太さ1の黒い実線、文字は18pxで遠征スケジュールの左側に表示)
+        // (遠征スケジュールの左側に表示)
         this.canvas.selectAll("line.rl").classed("rl", true)
             .data(d3.range(24 + 1))
             .enter()
             .append("line")
-            .attr("y1", h => Utility.timingToY(60 * h))
-            .attr("y2", h => Utility.timingToY(60 * h))
+            .attr("y1", h => Utility.timingToY(60 * h) + 0.5)
+            .attr("y2", h => Utility.timingToY(60 * h) + 0.5)
             .attr("x1", Utility.fleetIndexToX(0))
             .attr("x2", Utility.fleetIndexToX(Constant.FLEET_COUNT))
-            .attr("stroke-width", 1)
-            .attr("stroke", "black");
+            .attr("class", "svg-line");
         var hourStringList = d3.range(24 + 1).map(h => {
             var hour = (h + 5) % 24;
             return hour.toString() + ":00";
@@ -64,7 +62,7 @@ class MainController {
             .append("text")
                 .attr("x", h => Utility.fleetIndexToX(0) - hourStringList[h].length * 18 / 2)
                 .attr("y", h => Utility.timingToY(60 * h) + 9)
-                .attr("font-size", "18px")
+                .attr("class", "svg-hours")
                 .text((h) => hourStringList[h]);
     }
     /**
@@ -113,20 +111,19 @@ class MainController {
         // 遠征タスクをまとめて描画
         // (枠の色は透明度0％の黒、内部塗りつぶしは透明度20％のskyblue)
         tasks.append("rect")
-            .attr("x", function(task) { return task.rx; })
-            .attr("y", function(task) { return task.ry; })
+            .attr("x", function(task) { return task.rx + 0.5; })
+            .attr("y", function(task) { return task.ry + 0.5; })
             .attr("width",Constant.TASK_WIDTH)
             .attr("height",function(task){
                 return Constant.TASK_HEIGHT_PER_TIME * task.expedition.time;
             })
-            .attr("stroke", "black")
-            .style("opacity", 0.8)
+            .attr("class", "svg-task")
             .attr("fill","skyblue");
         // (文字は18pxで、遠征タスク枠の左上に横向きで描画)
         tasks.append("text")
             .attr("x", function(task) { return task.tx; })
             .attr("y", function(task) { return task.ty; })
-            .attr("font-size", "18px")
+            .attr("class", "svg-task_text")
             .text(function(task){
                 return task.expedition.name;
             });
@@ -156,8 +153,8 @@ class MainController {
         data.tx += d3.event.dx;
         data.ty += d3.event.dy;
         d3.selectAll("g > rect").filter((d, i) => (i === index))
-            .attr("x", data.rx)
-            .attr("y", data.ry);
+            .attr("x", data.rx + 0.5)
+            .attr("y", data.ry + 0.5);
         d3.selectAll("g > text").filter((d, i) => (i === index))
             .attr("x", data.tx)
             .attr("y", data.ty);
@@ -459,8 +456,8 @@ class MainController {
             .attr("x", data.tx)
             .attr("y", data.ty);
         d3.selectAll("g > rect").filter((d, i) => (i === index))
-            .attr("x", data.rx)
-            .attr("y", data.ry);
+            .attr("x", data.rx + 0.5)
+            .attr("y", data.ry + 0.5);
     }
     /**
      * 遠征の総収入を計算する
@@ -517,24 +514,4 @@ window.onload = async function(){
     await DataStore.initialize();
     // Controllerを初期化
     var mc = new MainController();
-    // UA判定
-    var userAgent = window.navigator.userAgent;
-    var parser = new UAParser(userAgent);
-    var result = parser.getResult();
-    if(result.device.type == null){
-        // PC判定
-        console.log("PC");
-    }else{
-        // モバイル判定
-        console.log("Mobile");
-        d3.select("#removeTask").style("font-size", "30px");
-        d3.select("#addTask").style("font-size", "30px");
-        d3.select("#changeTask").style("font-size", "30px");
-        d3.select("#saveTask").style("font-size", "30px");
-        d3.select("#areaName").style("font-size", "30px");
-        d3.select("#expName").style("font-size", "30px");
-        d3.select("#addPer").style("font-size", "30px");
-        d3.select("#supplyResult").style("font-size", "30px");
-        d3.selectAll("h2").style("font-size", "40px");
-    }
 };
